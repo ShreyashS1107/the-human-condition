@@ -1,0 +1,32 @@
+export const TOURS_DATA = [
+  {
+    id: 'LIBRARY',
+    title: 'THE LIBRARY OF HUMAN THOUGHT',
+    subtitle: 'Where the dead still have questions for the living.',
+    description: 'A gigantic impossible archive where endless vertical shelves vanish into darkness, flanked by suspended dust motes and wandering leaves of lost philosophies.',
+    themeColor: '#c49a45',
+    ambientHue: '#d4af37',
+    position: [-4.2, 0, -2],
+    stageTarget: 'LIBRARY',
+  },
+  {
+    id: 'MUSEUM',
+    title: 'THE MUSEUM OF LOST IDEAS',
+    subtitle: 'Where humanity keeps the questions it never answered.',
+    description: 'Surreal monolithic chambers of floating architecture and infinite thresholds standing silent in an unmeasured cosmic void.',
+    themeColor: '#968c7e',
+    ambientHue: '#7d8a9e',
+    position: [0, 0.4, -1],
+    stageTarget: 'MUSEUM',
+  },
+  {
+    id: 'BOOK',
+    title: 'THE BOOK THAT READS YOU',
+    subtitle: 'You came here to read. You may leave having been read.',
+    description: 'An isolated sanctum enveloped by total darkness, holding an ancient codex that watches every breath and turns its own pages.',
+    themeColor: '#8b2b2b',
+    ambientHue: '#a34848',
+    position: [4.2, 0, -2],
+    stageTarget: 'BOOK',
+  },
+];

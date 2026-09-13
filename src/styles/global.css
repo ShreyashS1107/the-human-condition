@@ -1,0 +1,122 @@
+@import './variables.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-abyss);
+  color: var(--text-parchment);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cinematic base overlay */
+.vignette-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at center,
+    transparent 40%,
+    rgba(7, 7, 8, 0.4) 75%,
+    rgba(7, 7, 8, 0.9) 100%
+  );
+  z-index: 50;
+}
+
+/* Editorial Typography Helpers */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+/* Scene container */
+.scene-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  z-index: 10;
+}
+
+/* Button & Interactive styles (atmospheric, non-SaaS) */
+.btn-ritual {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-parchment);
+  padding: 0.85rem 2rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--duration-normal) var(--ease-cinematic);
+  outline: none;
+}
+
+.btn-ritual:hover {
+  border-color: var(--gold-accent);
+  color: #fff;
+  box-shadow: 0 0 25px rgba(196, 154, 69, 0.2);
+  background: rgba(196, 154, 69, 0.05);
+}
+
+.btn-ritual:active {
+  transform: scale(0.98);
+}
+
+@keyframes openingFadeThrough {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+

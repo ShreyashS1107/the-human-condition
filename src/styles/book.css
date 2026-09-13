@@ -1,0 +1,208 @@
+/* The Book That Reads You - Atmospheric Styling */
+
+.book-scene-root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.5rem;
+  color: var(--text-parchment);
+}
+
+/* Subtle Stage Marker */
+.book-stage-header {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.book-stage-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.3em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+}
+
+/* Parchment Page Overlay Content - Intimate Lower Positioning */
+.book-page-container {
+  pointer-events: auto;
+  position: absolute;
+  bottom: 3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92%, 720px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem 2rem;
+  z-index: 25;
+}
+
+.book-question-prompt {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2.6vw, 1.6rem);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+  color: #f7efe1;
+  text-shadow: 0 2px 25px rgba(0, 0, 0, 0.9);
+  margin-bottom: 1.2rem;
+  white-space: pre-line;
+  max-width: 680px;
+  transition: opacity 0.8s ease;
+}
+
+.book-question-hint {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+/* Ink Input Form */
+.book-ink-form {
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.book-ink-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(196, 154, 69, 0.4);
+  color: #f7f4ec;
+  font-family: var(--font-serif);
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+  font-style: italic;
+  text-align: center;
+  line-height: 1.6;
+  padding: 0.75rem 1rem;
+  resize: none;
+  outline: none;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.book-ink-textarea:focus {
+  border-bottom-color: var(--gold-accent);
+  box-shadow: 0 4px 15px rgba(196, 154, 69, 0.1);
+}
+
+.book-ink-textarea::placeholder {
+  color: rgba(150, 140, 126, 0.35);
+  font-style: italic;
+}
+
+.book-submit-btn {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-parchment);
+  padding: 0.65rem 1.8rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.4s var(--ease-cinematic);
+}
+
+.book-submit-btn:hover:not(:disabled) {
+  border-color: var(--gold-accent);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(196, 154, 69, 0.2);
+}
+
+.book-submit-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* "I THINK I UNDERSTAND YOU" Display */
+.understand-moment-text {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  letter-spacing: 0.25em;
+  font-weight: 700;
+  color: #f5eedf;
+  text-shadow: 0 0 35px rgba(245, 238, 223, 0.3);
+  animation: understandGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes understandGlow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; text-shadow: 0 0 50px rgba(196, 154, 69, 0.4); }
+}
+
+/* Philosophical Manuscript Letter Reading Overlay */
+.letter-page-card {
+  width: 100%;
+  max-width: 680px;
+  text-align: left;
+  line-height: 1.8;
+  font-family: var(--font-serif);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: #ede5d3;
+  padding: 1rem 0;
+  white-space: pre-line;
+  animation: letterPageFade 0.8s ease forwards;
+}
+
+@keyframes letterPageFade {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.letter-footer-controls {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 680px;
+}
+
+.letter-page-counter {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--gold-dim);
+}
+
+/* Final Dark Transition */
+.book-dark-transition {
+  position: absolute;
+  inset: 0;
+  background: #000000;
+  z-index: 60;
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bookFadeToBlack 3.5s forwards ease-in-out;
+}
+
+@keyframes bookFadeToBlack {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .book-scene-root {
+    padding: 1.5rem 1rem;
+  }
+  .book-page-container {
+    width: 95%;
+    padding: 1.5rem;
+  }
+}

@@ -1,0 +1,31 @@
+:root {
+  /* Color Palette - Dark Academia, Parchment, Void, Cosmic Ink */
+  --bg-abyss: #070708;
+  --bg-deep: #0e0d0f;
+  --bg-surface: #141317;
+  --bg-manuscript: #1c1a1f;
+  
+  --text-parchment: #e8dec8;
+  --text-muted: #968c7e;
+  --text-dim: #544e45;
+  
+  --gold-accent: #c49a45;
+  --gold-dim: #7a5f27;
+  --blood-accent: #8b2b2b;
+  --verdigris-accent: #3a6860;
+  --void-accent: #3b4259;
+
+  --border-subtle: rgba(196, 154, 69, 0.15);
+  --border-active: rgba(196, 154, 69, 0.45);
+  --border-ethereal: rgba(232, 222, 200, 0.08);
+
+  /* Typography */
+  --font-display: 'Cinzel', serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-mono: 'Space Mono', monospace;
+
+  /* Transitions */
+  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-slow: 0.8s;
+  --duration-normal: 0.4s;
+}
