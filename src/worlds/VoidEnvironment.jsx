@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { useExperience } from '../hooks/useExperience';
 
 /**
- * VOID ENVIRONMENT — PASS 06B: THE VOID REMEMBERS — MUSEUM TRACE
+ * VOID ENVIRONMENT — PASS 06C: THE VOID REMEMBERS — BOOK TRACE
  * 
  * 1. Three Depth Layers (Foreground, Midground, Background)
  * 2. Ancient Imperfect Architectural Remnants (Columns, Arches, Entablatures, Portals)
@@ -12,13 +12,12 @@ import { useExperience } from '../hooks/useExperience';
  * 4. The Distant Colossus Monument (Extreme distance Z: -92m)
  * 5. Physical Floating Manuscripts of Human Thought (14 deterministic fragments)
  * 6. Pass 06A: The Void Remembers — Library Trace (Awakened thought, counter-current drift)
- * 7. Pass 06B Addition: The Void Remembers — Museum Trace (Something has been disturbed)
- *    - After meaningful Museum interaction, 2–3 existing distant architectural elements
- *      undergo an extremely slow, subtle physical settling / misalignment
- *    - Left flank dislodged block shifts slightly on the plinth
- *    - Severed column drum develops an imperceptible offset
- *    - Distant Great Arch fractured overhang settles slightly into a gravitational tilt
- *    - Completely non-looping, deterministic damping, zero new geometry, zero UI
+ * 7. Pass 06B: The Void Remembers — Museum Trace (Something has been physically disturbed)
+ * 8. Pass 06C Addition: The Void Remembers — Book Trace (Something was remembered)
+ *    - After meaningful Book interaction, 3 existing midground/background manuscript fragments
+ *      resurface in memory: settling into calmer, clearer resting orientations with subtle
+ *      opacity restoration, while dampening active oscillation (LIBRARY -> alive, BOOK -> remembered)
+ *    - Completely non-looping, deterministic damping, zero new geometry, zero UI, zero injected user text
  */
 
 // ============================================================================
@@ -242,6 +241,9 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.28,
     phase: 4.1,
     isLibraryResponsive: false,
+    isBookResponsive: true,
+    bookOffset: [-0.06, 0.08, 0.12],
+    bookTargetRot: [-0.06, 0.08, 0.02],
   },
   {
     id: 'mg-3',
@@ -254,6 +256,7 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.2,
     phase: 0.9,
     isLibraryResponsive: true,
+    isBookResponsive: false,
   },
   {
     id: 'mg-4',
@@ -266,6 +269,9 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.26,
     phase: 3.2,
     isLibraryResponsive: false,
+    isBookResponsive: true,
+    bookOffset: [0.08, 0.10, 0.14],
+    bookTargetRot: [0.04, 0.10, -0.01],
   },
   {
     id: 'mg-5',
@@ -278,6 +284,7 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.24,
     phase: 5.0,
     isLibraryResponsive: false,
+    isBookResponsive: false,
   },
   {
     id: 'mg-6',
@@ -290,6 +297,7 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.18,
     phase: 1.3,
     isLibraryResponsive: false,
+    isBookResponsive: false,
   },
 
   // --- BACKGROUND FRAGMENTS (6 items: distant monumental scale) ---
@@ -304,6 +312,7 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.15,
     phase: 2.1,
     isLibraryResponsive: true,
+    isBookResponsive: false,
   },
   {
     id: 'bg-2',
@@ -316,6 +325,9 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.18,
     phase: 4.6,
     isLibraryResponsive: false,
+    isBookResponsive: true,
+    bookOffset: [0.12, 0.16, 0.28],
+    bookTargetRot: [-0.05, -0.08, 0.02],
   },
   {
     id: 'bg-3',
@@ -328,6 +340,7 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.14,
     phase: 0.7,
     isLibraryResponsive: false,
+    isBookResponsive: false,
   },
   {
     id: 'bg-4',
@@ -340,6 +353,7 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.16,
     phase: 3.8,
     isLibraryResponsive: true,
+    isBookResponsive: false,
   },
   {
     id: 'bg-5',
@@ -352,6 +366,7 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.12,
     phase: 5.5,
     isLibraryResponsive: false,
+    isBookResponsive: false,
   },
   {
     id: 'bg-6',
@@ -364,12 +379,14 @@ const MANUSCRIPT_ITEMS = [
     speed: 0.15,
     phase: 1.9,
     isLibraryResponsive: false,
+    isBookResponsive: false,
   },
 ];
 
-function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
+function FloatingManuscripts({ isEncounterActive, hasLibraryMemory, hasBookMemory }) {
   const groupRef = useRef();
-  const memoryProgressRef = useRef(0);
+  const libraryMemoryProgressRef = useRef(0);
+  const bookMemoryProgressRef = useRef(0);
 
   const textures = useMemo(() => {
     return {
@@ -393,6 +410,7 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
   const materials = useMemo(() => {
     const mats = {};
     Object.keys(textures).forEach((key) => {
+      // Standard material
       mats[key] = new THREE.MeshStandardMaterial({
         map: textures[key],
         roughness: 0.76,
@@ -402,41 +420,85 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
         opacity: isEncounterActive ? 0.45 : hasLibraryMemory ? 0.88 : 0.82,
         shadowSide: THREE.DoubleSide,
       });
+      // PASS 06C: Book-remembered material (slightly clearer presence, without glow or brightness increase)
+      mats[`${key}_BOOK`] = new THREE.MeshStandardMaterial({
+        map: textures[key],
+        roughness: 0.74,
+        metalness: 0.02,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: isEncounterActive ? 0.45 : hasBookMemory ? 0.91 : 0.82,
+        shadowSide: THREE.DoubleSide,
+      });
     });
     return mats;
-  }, [textures, isEncounterActive, hasLibraryMemory]);
+  }, [textures, isEncounterActive, hasLibraryMemory, hasBookMemory]);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     const time = state.clock.elapsedTime;
     const speedMult = isEncounterActive ? 0.35 : 1.0;
 
-    const targetMemory = hasLibraryMemory ? 1.0 : 0.0;
-    memoryProgressRef.current = THREE.MathUtils.damp(
-      memoryProgressRef.current,
-      targetMemory,
+    // Library memory interpolation
+    const targetLibMemory = hasLibraryMemory ? 1.0 : 0.0;
+    libraryMemoryProgressRef.current = THREE.MathUtils.damp(
+      libraryMemoryProgressRef.current,
+      targetLibMemory,
       0.5,
       delta
     );
-    const mem = memoryProgressRef.current;
+    const libMem = libraryMemoryProgressRef.current;
+
+    // Book memory interpolation
+    const targetBookMemory = hasBookMemory ? 1.0 : 0.0;
+    bookMemoryProgressRef.current = THREE.MathUtils.damp(
+      bookMemoryProgressRef.current,
+      targetBookMemory,
+      0.4,
+      delta
+    );
+    const bookMem = bookMemoryProgressRef.current;
 
     groupRef.current.children.forEach((child, i) => {
       const item = MANUSCRIPT_ITEMS[i];
       if (!item) return;
 
-      if (item.isLibraryResponsive && mem > 0.01) {
-        const memWaveY = Math.sin(time * 0.38 + item.phase) * (0.04 * mem);
-        const memDriftX = Math.cos(time * 0.28 + item.phase) * (0.035 * mem);
-        const memYawOffset = 0.12 * mem;
+      if (item.isLibraryResponsive && libMem > 0.01) {
+        // PASS 06A: Awakened thought - lively counter-current drift & wave
+        const memWaveY = Math.sin(time * 0.38 + item.phase) * (0.04 * libMem);
+        const memDriftX = Math.cos(time * 0.28 + item.phase) * (0.035 * libMem);
+        const memYawOffset = 0.12 * libMem;
 
         child.position.x = item.pos[0] + memDriftX * speedMult;
-        child.position.y = item.pos[1] + Math.sin(time * (item.speed + 0.05 * mem) * speedMult + item.phase) * 0.08 + memWaveY * speedMult;
+        child.position.y = item.pos[1] + Math.sin(time * (item.speed + 0.05 * libMem) * speedMult + item.phase) * 0.08 + memWaveY * speedMult;
+        child.position.z = item.pos[2];
         child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
         child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
-        child.rotation.y += delta * (0.02 + 0.008 * mem) * speedMult * (i % 2 === 0 ? 1 : -1) + (memYawOffset * 0.015);
+        child.rotation.y += delta * (0.02 + 0.008 * libMem) * speedMult * (i % 2 === 0 ? 1 : -1) + (memYawOffset * 0.015);
+      } else if (item.isBookResponsive && bookMem > 0.01) {
+        // PASS 06C: Memory Resurfacing - calmer, settled resting orientation & subtle positional presence
+        const calmSpeed = item.speed * (1.0 - 0.55 * bookMem);
+        const calmWaveAmp = 0.08 * (1.0 - 0.65 * bookMem);
+        const offsetX = (item.bookOffset ? item.bookOffset[0] : 0.06) * bookMem;
+        const offsetY = (item.bookOffset ? item.bookOffset[1] : 0.08) * bookMem;
+        const offsetZ = (item.bookOffset ? item.bookOffset[2] : 0.12) * bookMem;
+
+        child.position.x = item.pos[0] + offsetX;
+        child.position.y = item.pos[1] + Math.sin(time * calmSpeed * speedMult + item.phase) * calmWaveAmp + offsetY;
+        child.position.z = item.pos[2] + offsetZ;
+
+        // Settles into clearer, calmer, more front-facing resting angle
+        const targetRotX = THREE.MathUtils.lerp(item.rot[0], item.bookTargetRot[0], bookMem);
+        const targetRotY = THREE.MathUtils.lerp(item.rot[1], item.bookTargetRot[1], bookMem);
+        const targetRotZ = THREE.MathUtils.lerp(item.rot[2], item.bookTargetRot[2], bookMem);
+
+        child.rotation.x = targetRotX + Math.sin(time * 0.15 * speedMult + item.phase) * (0.015 * (1.0 - 0.6 * bookMem));
+        child.rotation.z = targetRotZ + Math.cos(time * 0.12 * speedMult + item.phase) * (0.012 * (1.0 - 0.6 * bookMem));
+        child.rotation.y = THREE.MathUtils.lerp(child.rotation.y, targetRotY, 0.05) + delta * 0.004 * speedMult * (1.0 - 0.6 * bookMem);
       } else {
         child.position.x = item.pos[0];
         child.position.y = item.pos[1] + Math.sin(time * item.speed * speedMult + item.phase) * 0.08;
+        child.position.z = item.pos[2];
         child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
         child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
         child.rotation.y += delta * 0.02 * speedMult * (i % 2 === 0 ? 1 : -1);
@@ -451,7 +513,8 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
         if (isEncounterActive && isFg) return null;
 
         const geom = item.hasFold ? geometries.curvedFolded : geometries.curved;
-        const mat = materials[item.textType] || materials.UNREADABLE;
+        const matKey = item.isBookResponsive ? `${item.textType}_BOOK` : item.textType;
+        const mat = materials[matKey] || materials.UNREADABLE;
 
         return (
           <mesh
@@ -944,9 +1007,11 @@ export function VoidEnvironment() {
     visitedPhilosophers,
     discoveredBooks,
     visitedMuseumRooms,
+    bookAnswers,
+    philosophicalLetter,
   } = useExperience();
 
-  // PASS 06A: Memory Trace of Library of Human Thought
+  // PASS 06A: Memory Trace of Library of Human Thought (Awakened thoughts)
   const hasLibraryMemory = Boolean(
     (visitedPhilosophers && visitedPhilosophers.length > 0) ||
     (discoveredBooks && discoveredBooks.length > 0)
@@ -955,6 +1020,12 @@ export function VoidEnvironment() {
   // PASS 06B: Memory Trace of Museum of Paradoxes (Something has been physically disturbed)
   const hasMuseumMemory = Boolean(
     visitedMuseumRooms && visitedMuseumRooms.length > 0
+  );
+
+  // PASS 06C: Memory Trace of The Book (Something was remembered)
+  const hasBookMemory = Boolean(
+    (bookAnswers && Object.keys(bookAnswers).length > 0) ||
+    philosophicalLetter
   );
 
   const materials = useMemo(() => {
@@ -1029,10 +1100,11 @@ export function VoidEnvironment() {
         hasMuseumMemory={hasMuseumMemory}
       />
 
-      {/* 4. PHYSICAL FLOATING MANUSCRIPTS (PASS 06A: Library Trace Memory) */}
+      {/* 4. PHYSICAL FLOATING MANUSCRIPTS (PASS 06A: Library Trace & PASS 06C: Book Trace Memory) */}
       <FloatingManuscripts
         isEncounterActive={isEncounterActive}
         hasLibraryMemory={hasLibraryMemory}
+        hasBookMemory={hasBookMemory}
       />
     </group>
   );
