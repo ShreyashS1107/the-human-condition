@@ -4,19 +4,21 @@ import * as THREE from 'three';
 import { useExperience } from '../hooks/useExperience';
 
 /**
- * VOID ENVIRONMENT — PASS 06A: THE VOID REMEMBERS — LIBRARY TRACE
+ * VOID ENVIRONMENT — PASS 06B: THE VOID REMEMBERS — MUSEUM TRACE
  * 
  * 1. Three Depth Layers (Foreground, Midground, Background)
  * 2. Ancient Imperfect Architectural Remnants (Columns, Arches, Entablatures, Portals)
  * 3. Hero Architecture: The Cyclopean Great Staircase & Broken Void Portal
  * 4. The Distant Colossus Monument (Extreme distance Z: -92m)
  * 5. Physical Floating Manuscripts of Human Thought (14 deterministic fragments)
- * 6. Pass 06A Addition: The Void Remembers (Library Trace)
- *    - After the user has visited / interacted with the Library of Human Thought:
- *      3–4 specific existing manuscript fragments subtly change behavior
- *    - A gentle, delayed counter-current drift and slight orientation shift
- *    - Handwriting feels subtly resurfaced ("thoughts that have been disturbed")
- *    - Remaining 10+ fragments behave as before; no swarming, no flying, zero UI
+ * 6. Pass 06A: The Void Remembers — Library Trace (Awakened thought, counter-current drift)
+ * 7. Pass 06B Addition: The Void Remembers — Museum Trace (Something has been disturbed)
+ *    - After meaningful Museum interaction, 2–3 existing distant architectural elements
+ *      undergo an extremely slow, subtle physical settling / misalignment
+ *    - Left flank dislodged block shifts slightly on the plinth
+ *    - Severed column drum develops an imperceptible offset
+ *    - Distant Great Arch fractured overhang settles slightly into a gravitational tilt
+ *    - Completely non-looping, deterministic damping, zero new geometry, zero UI
  */
 
 // ============================================================================
@@ -186,7 +188,7 @@ function ForegroundAtmosphere({ isEncounterActive }) {
 }
 
 // ============================================================================
-// 3. LAYER: FLOATING MANUSCRIPT FRAGMENTS (WITH LIBRARY TRACE MEMORY)
+// 3. LAYER: FLOATING MANUSCRIPT FRAGMENTS (PASS 06A: LIBRARY TRACE MEMORY)
 // ============================================================================
 
 const MANUSCRIPT_ITEMS = [
@@ -217,7 +219,6 @@ const MANUSCRIPT_ITEMS = [
   },
 
   // --- MIDGROUND FRAGMENTS (6 items: near columns, arch, wall remnants) ---
-  // Responsive Item 1: Near left broken architrave
   {
     id: 'mg-1',
     layer: 'MIDGROUND',
@@ -242,7 +243,6 @@ const MANUSCRIPT_ITEMS = [
     phase: 4.1,
     isLibraryResponsive: false,
   },
-  // Responsive Item 2: Floating high in colonnade opening
   {
     id: 'mg-3',
     layer: 'MIDGROUND',
@@ -293,7 +293,6 @@ const MANUSCRIPT_ITEMS = [
   },
 
   // --- BACKGROUND FRAGMENTS (6 items: distant monumental scale) ---
-  // Responsive Item 3: Near Great Staircase
   {
     id: 'bg-1',
     layer: 'BACKGROUND',
@@ -330,7 +329,6 @@ const MANUSCRIPT_ITEMS = [
     phase: 0.7,
     isLibraryResponsive: false,
   },
-  // Responsive Item 4: High in distant hypostyle ruins
   {
     id: 'bg-4',
     layer: 'BACKGROUND',
@@ -413,7 +411,6 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
     const time = state.clock.elapsedTime;
     const speedMult = isEncounterActive ? 0.35 : 1.0;
 
-    // Smooth deterministic transition of library memory influence
     const targetMemory = hasLibraryMemory ? 1.0 : 0.0;
     memoryProgressRef.current = THREE.MathUtils.damp(
       memoryProgressRef.current,
@@ -428,7 +425,6 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
       if (!item) return;
 
       if (item.isLibraryResponsive && mem > 0.01) {
-        // Subtle disturbed drift: secondary counter-current wave & slight yaw orientation shift
         const memWaveY = Math.sin(time * 0.38 + item.phase) * (0.04 * mem);
         const memDriftX = Math.cos(time * 0.28 + item.phase) * (0.035 * mem);
         const memYawOffset = 0.12 * mem;
@@ -439,7 +435,6 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
         child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
         child.rotation.y += delta * (0.02 + 0.008 * mem) * speedMult * (i % 2 === 0 ? 1 : -1) + (memYawOffset * 0.015);
       } else {
-        // Standard serene baseline drift
         child.position.x = item.pos[0];
         child.position.y = item.pos[1] + Math.sin(time * item.speed * speedMult + item.phase) * 0.08;
         child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
@@ -476,7 +471,7 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
 }
 
 // ============================================================================
-// 4. LAYER 2: IMPERFECT ANCIENT ARCHITECTURE
+// 4. LAYER 2: IMPERFECT ANCIENT ARCHITECTURE (WITH MUSEUM TRACE DISTURBANCE)
 // ============================================================================
 
 function RuinedColumn({
@@ -486,9 +481,23 @@ function RuinedColumn({
   drumHeight = 2.8,
   hasFallenDrum = false,
   rotationY = 0,
+  isDisturbed = false,
   materials,
 }) {
   const { agedStone, darkBasalt, bronze } = materials;
+  const topDrumRef = useRef();
+
+  useFrame((_, delta) => {
+    if (!topDrumRef.current) return;
+    // PASS 06B: Subtle physical misalignment offset on disturbed severed drum
+    const targetOffsetX = isDisturbed ? 0.055 : 0;
+    const targetOffsetZ = isDisturbed ? -0.04 : 0;
+    const targetRotY = isDisturbed ? 0.045 : 0;
+
+    topDrumRef.current.position.x = THREE.MathUtils.damp(topDrumRef.current.position.x, targetOffsetX, 0.4, delta);
+    topDrumRef.current.position.z = THREE.MathUtils.damp(topDrumRef.current.position.z, targetOffsetZ, 0.4, delta);
+    topDrumRef.current.rotation.y = THREE.MathUtils.damp(topDrumRef.current.rotation.y, targetRotY, 0.4, delta);
+  });
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
@@ -502,13 +511,19 @@ function RuinedColumn({
 
       {/* Stacked Asymmetric Drums */}
       {Array.from({ length: drumCount }).map((_, idx) => {
+        const isTopDrum = idx === drumCount - 1 && isDisturbed;
         const yPos = drumHeight * 0.55 + idx * drumHeight;
         const rotY = idx * 0.14 + (idx % 2 === 0 ? 0.04 : -0.03);
         const radiusBottom = radius * (1.02 - idx * 0.015);
         const radiusTop = radius * (0.99 - idx * 0.015);
 
         return (
-          <group key={idx} position={[0, yPos, 0]} rotation={[0, rotY, 0]}>
+          <group
+            key={idx}
+            ref={isTopDrum ? topDrumRef : undefined}
+            position={[0, yPos, 0]}
+            rotation={[0, rotY, 0]}
+          >
             <mesh material={agedStone} castShadow receiveShadow>
               <cylinderGeometry args={[radiusTop, radiusBottom, drumHeight * 0.96, 16]} />
             </mesh>
@@ -551,8 +566,27 @@ function RuinedColumn({
   );
 }
 
-function MidgroundArchitecture({ materials }) {
+function MidgroundArchitecture({ materials, hasMuseumMemory }) {
   const { agedStone, darkBasalt, weatheredStone, bronze } = materials;
+  const dislodgedBlockRef = useRef();
+
+  useFrame((_, delta) => {
+    if (!dislodgedBlockRef.current) return;
+    // PASS 06B: Extremely slow structural settling / subtle offset on left fallen block
+    const targetX = hasMuseumMemory ? 7.64 : 7.5;
+    const targetY = hasMuseumMemory ? -4.28 : -4.2;
+    const targetZ = hasMuseumMemory ? 2.32 : 2.2;
+    const targetRotX = hasMuseumMemory ? 0.22 : 0.18;
+    const targetRotY = hasMuseumMemory ? 0.49 : 0.45;
+    const targetRotZ = hasMuseumMemory ? -0.09 : -0.12;
+
+    dislodgedBlockRef.current.position.x = THREE.MathUtils.damp(dislodgedBlockRef.current.position.x, targetX, 0.4, delta);
+    dislodgedBlockRef.current.position.y = THREE.MathUtils.damp(dislodgedBlockRef.current.position.y, targetY, 0.4, delta);
+    dislodgedBlockRef.current.position.z = THREE.MathUtils.damp(dislodgedBlockRef.current.position.z, targetZ, 0.4, delta);
+    dislodgedBlockRef.current.rotation.x = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.x, targetRotX, 0.4, delta);
+    dislodgedBlockRef.current.rotation.y = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.y, targetRotY, 0.4, delta);
+    dislodgedBlockRef.current.rotation.z = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.z, targetRotZ, 0.4, delta);
+  });
 
   return (
     <group name="MidgroundRemnants">
@@ -596,7 +630,9 @@ function MidgroundArchitecture({ materials }) {
           ))}
         </group>
 
+        {/* Dislodged Fallen Architrave Block (PASS 06B: Reacts to Museum memory) */}
         <mesh
+          ref={dislodgedBlockRef}
           position={[7.5, -4.2, 2.2]}
           rotation={[0.18, 0.45, -0.12]}
           material={agedStone}
@@ -617,6 +653,7 @@ function MidgroundArchitecture({ materials }) {
         rotationY={0.3}
         materials={materials}
       />
+      {/* PASS 06B: Severed Column Drum develops subtle settling misalignment */}
       <RuinedColumn
         position={[-5.0, -3.8, -28]}
         drumCount={3}
@@ -624,6 +661,7 @@ function MidgroundArchitecture({ materials }) {
         drumHeight={2.6}
         hasFallenDrum={false}
         rotationY={-0.4}
+        isDisturbed={hasMuseumMemory}
         materials={materials}
       />
       <RuinedColumn
@@ -790,8 +828,21 @@ function DistantColossusMonument({ materials }) {
 // 6. LAYER 3: BACKGROUND MONUMENTAL RUINS + HERO STRUCTURES
 // ============================================================================
 
-function BackgroundArchitecture({ materials }) {
+function BackgroundArchitecture({ materials, hasMuseumMemory }) {
   const { darkBasalt, distantStone, weatheredStone } = materials;
+  const archOverhangRef = useRef();
+
+  useFrame((_, delta) => {
+    if (!archOverhangRef.current) return;
+    // PASS 06B: Subtle gravitational settling tilt on fractured Great Arch lintel overhang
+    const targetRotX = hasMuseumMemory ? -0.02 : 0;
+    const targetRotY = hasMuseumMemory ? 0.145 : 0.12;
+    const targetRotZ = hasMuseumMemory ? -0.11 : -0.08;
+
+    archOverhangRef.current.rotation.x = THREE.MathUtils.damp(archOverhangRef.current.rotation.x, targetRotX, 0.35, delta);
+    archOverhangRef.current.rotation.y = THREE.MathUtils.damp(archOverhangRef.current.rotation.y, targetRotY, 0.35, delta);
+    archOverhangRef.current.rotation.z = THREE.MathUtils.damp(archOverhangRef.current.rotation.z, targetRotZ, 0.35, delta);
+  });
 
   return (
     <group name="BackgroundMonuments">
@@ -819,11 +870,13 @@ function BackgroundArchitecture({ materials }) {
           <boxGeometry args={[4.6, 42.0, 4.6]} />
         </mesh>
 
+        {/* Great Arch Lintel (PASS 06B: Fractured overhang settles upon Museum memory) */}
         <group position={[1.5, 36.5, -17.0]}>
           <mesh position={[2.0, 0, 0]} material={distantStone}>
             <boxGeometry args={[16.0, 4.5, 5.0]} />
           </mesh>
           <mesh
+            ref={archOverhangRef}
             position={[-7.0, 0.8, 0.2]}
             rotation={[0, 0.12, -0.08]}
             material={weatheredStone}
@@ -890,12 +943,18 @@ export function VoidEnvironment() {
     inspectingBook,
     visitedPhilosophers,
     discoveredBooks,
+    visitedMuseumRooms,
   } = useExperience();
 
   // PASS 06A: Memory Trace of Library of Human Thought
   const hasLibraryMemory = Boolean(
     (visitedPhilosophers && visitedPhilosophers.length > 0) ||
     (discoveredBooks && discoveredBooks.length > 0)
+  );
+
+  // PASS 06B: Memory Trace of Museum of Paradoxes (Something has been physically disturbed)
+  const hasMuseumMemory = Boolean(
+    visitedMuseumRooms && visitedMuseumRooms.length > 0
   );
 
   const materials = useMemo(() => {
@@ -958,13 +1017,19 @@ export function VoidEnvironment() {
       {/* 1. FOREGROUND LAYER: Atmospheric Dust */}
       <ForegroundAtmosphere isEncounterActive={isEncounterActive} />
 
-      {/* 2. MIDGROUND LAYER: Ancient Imperfect Architectural Remnants */}
-      <MidgroundArchitecture materials={materials} />
+      {/* 2. MIDGROUND LAYER: Ancient Imperfect Architectural Remnants (PASS 06B: Museum Disturbance) */}
+      <MidgroundArchitecture
+        materials={materials}
+        hasMuseumMemory={hasMuseumMemory}
+      />
 
-      {/* 3. BACKGROUND LAYER: Distant Ruins, The Great Staircase & The Distant Colossus */}
-      <BackgroundArchitecture materials={materials} />
+      {/* 3. BACKGROUND LAYER: Distant Ruins & Hero Structures (PASS 06B: Great Arch Settling) */}
+      <BackgroundArchitecture
+        materials={materials}
+        hasMuseumMemory={hasMuseumMemory}
+      />
 
-      {/* 4. PHYSICAL FLOATING MANUSCRIPTS (PASS 06A: With Library Trace Memory) */}
+      {/* 4. PHYSICAL FLOATING MANUSCRIPTS (PASS 06A: Library Trace Memory) */}
       <FloatingManuscripts
         isEncounterActive={isEncounterActive}
         hasLibraryMemory={hasLibraryMemory}
