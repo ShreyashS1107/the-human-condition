@@ -240,9 +240,9 @@ export function LibraryWorld({
       <fog
         attach="fog"
         args={[
-          activePhilosopher ? '#030305' : '#060608',
-          activePhilosopher ? 3.0 : 4.0,
-          activePhilosopher ? 14.0 : 20.0,
+          activePhilosopher ? '#020204' : '#030305',
+          activePhilosopher ? 6.0 : 8.0,
+          activePhilosopher ? 75.0 : 95.0,
         ]}
       />
 

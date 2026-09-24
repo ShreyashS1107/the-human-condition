@@ -1,62 +1,29 @@
-import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Float } from '@react-three/drei';
+import React from 'react';
 import { MUSEUM_ROOMS_DATA } from '../data/museumRooms';
 import { RoomPortal } from '../scenes/Museum/RoomPortal';
 import { MuseumCamera } from '../scenes/Museum/MuseumCamera';
 import { useExperience } from '../hooks/useExperience';
 
-// Floating Surreal Colonnade Bridges in the Void
-function FloatingBridges() {
-  const bridgesRef = useRef();
-
-  useFrame((state, delta) => {
-    if (bridgesRef.current) {
-      bridgesRef.current.children.forEach((child, i) => {
-        child.position.y += Math.sin(state.clock.elapsedTime * 0.5 + i) * 0.002;
-        child.rotation.y += delta * 0.02 * (i % 2 === 0 ? 1 : -1);
-      });
-    }
-  });
-
+// Dark Stone Gallery Platform Flags in the Void
+function GalleryFlags() {
   return (
-    <group ref={bridgesRef}>
-      {/* Floating horizontal walkway monoliths */}
+    <group position={[0, -1.8, -4.0]}>
+      {/* Dark monolithic walkway flagstones */}
       {[-6, -2, 2, 6].map((x, idx) => (
-        <group key={idx} position={[x, -1.8, -4.5]}>
-          {/* Main Dark Slate Block */}
+        <group key={idx} position={[x, 0, 0]}>
           <mesh castShadow receiveShadow>
-            <boxGeometry args={[3.2, 0.16, 1.3]} />
-            <meshStandardMaterial color="#0b0d10" roughness={0.75} metalness={0.4} />
+            <boxGeometry args={[3.2, 0.16, 1.4]} />
+            <meshStandardMaterial color="#0a0b0e" roughness={0.9} metalness={0.1} />
           </mesh>
-          {/* Brass Joinery Pins */}
+          {/* Subtle bronze mortise inlays */}
           {[-1.4, 1.4].map((pinX, pIdx) => (
-            <mesh key={pIdx} position={[pinX, 0.09, 0]} castShadow>
-              <cylinderGeometry args={[0.04, 0.04, 0.06, 12]} />
-              <meshStandardMaterial color="#c49a45" metalness={0.92} roughness={0.25} />
+            <mesh key={pIdx} position={[pinX, 0.085, 0]} castShadow>
+              <cylinderGeometry args={[0.035, 0.035, 0.02, 12]} />
+              <meshStandardMaterial color="#8a7342" metalness={0.85} roughness={0.35} />
             </mesh>
           ))}
-          {/* Subtle under-rim glow */}
-          <mesh position={[0, -0.09, 0]}>
-            <boxGeometry args={[3.0, 0.02, 1.1]} />
-            <meshBasicMaterial color="#3a506b" transparent opacity={0.25} />
-          </mesh>
         </group>
       ))}
-
-      {/* Distant Floating Surreal Polyhedrons in Void */}
-      <Float speed={1.5} rotationIntensity={0.4} floatIntensity={0.6}>
-        <mesh position={[0, 4.2, -10]} castShadow>
-          <octahedronGeometry args={[1.6, 0]} />
-          <meshPhysicalMaterial
-            color="#14171e"
-            roughness={0.25}
-            metalness={0.88}
-            clearcoat={0.6}
-            clearcoatRoughness={0.2}
-          />
-        </mesh>
-      </Float>
     </group>
   );
 }
@@ -71,21 +38,21 @@ export function MuseumWorld({
 
   return (
     <group>
-      {/* Deep cosmic void fog - tighter and intimate when inside an encounter chamber */}
+      {/* Subtle void fog - intimate focus in active encounter, deep expansive falloff in overview */}
       <fog
         attach="fog"
         args={[
-          activeRoom ? '#030406' : '#050608',
-          activeRoom ? 3.0 : 5.0,
-          activeRoom ? 15.0 : 22.0,
+          activeRoom ? '#020305' : '#020305',
+          activeRoom ? 6.0 : 8.0,
+          activeRoom ? 75.0 : 95.0,
         ]}
       />
 
       {/* Cinematic Camera Interpolation */}
       <MuseumCamera activeRoom={activeRoom} />
 
-      {/* Floating Surreal Architecture - only visible in Void Overview */}
-      {!activeRoom && <FloatingBridges />}
+      {/* Gallery Walkway Flags - only visible in Void Overview */}
+      {!activeRoom && <GalleryFlags />}
 
       {/* 7 Floating Chamber Portals - Strict Isolation Rule: ONLY active chamber rendered in encounter */}
       {MUSEUM_ROOMS_DATA.map((room) => {

@@ -13,20 +13,31 @@ import { useExperience } from '../hooks/useExperience';
  *    barely visible against the black void, establishing impossible scale and parallax.
  */
 
+// Precomputed deterministic distribution for foreground atmospheric dust motes
+function createDustPositions(count = 190) {
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    // Simple deterministic hash-like sequence for reproducible particle distribution
+    const s1 = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
+    const s2 = Math.sin(i * 26.6514 + 45.164) * 23421.6312;
+    const s3 = Math.sin(i * 39.3467 + 11.876) * 31415.9265;
+    
+    const r1 = s1 - Math.floor(s1);
+    const r2 = s2 - Math.floor(s2);
+    const r3 = s3 - Math.floor(s3);
+
+    pos[i * 3] = (r1 - 0.5) * 22;
+    pos[i * 3 + 1] = (r2 - 0.5) * 12 + 1.5;
+    pos[i * 3 + 2] = (r3 - 0.5) * 16 + 2;
+  }
+  return pos;
+}
+
+const STATIC_DUST_POSITIONS = createDustPositions(190);
+
 // 1. FOREGROUND LAYER: Sparse Atmospheric Dust Motes close to camera
 function ForegroundAtmosphere({ isEncounterActive }) {
   const pointsRef = useRef();
-
-  const [positions] = useMemo(() => {
-    const count = 190;
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i += 3) {
-      pos[i] = (Math.random() - 0.5) * 22;
-      pos[i + 1] = (Math.random() - 0.5) * 12 + 1.5;
-      pos[i + 2] = (Math.random() - 0.5) * 16 + 2;
-    }
-    return [pos];
-  }, []);
 
   useFrame((state, delta) => {
     if (pointsRef.current) {
@@ -40,7 +51,7 @@ function ForegroundAtmosphere({ isEncounterActive }) {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          args={[positions, 3]}
+          args={[STATIC_DUST_POSITIONS, 3]}
         />
       </bufferGeometry>
       <pointsMaterial

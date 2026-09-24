@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Stars, Float } from '@react-three/drei';
+import { Float } from '@react-three/drei';
 import * as THREE from 'three';
 import { useExperience } from '../hooks/useExperience';
 import { TOURS_DATA } from '../data/tours';
@@ -9,6 +9,7 @@ import { LibraryWorld } from './LibraryWorld';
 import { MuseumWorld } from './MuseumWorld';
 import { BookWorld } from './BookWorld/BookWorld';
 import { FinaleWorld } from './FinaleWorld/FinaleWorld';
+import { VoidEnvironment } from './VoidEnvironment';
 import { extractJourneyFragments } from '../systems/extractJourneyFragments';
 
 function OpeningMonolith() {
@@ -227,19 +228,10 @@ export function WorldContainer() {
   return (
     <>
       <color attach="background" args={['#000000']} />
+      <fog attach="fog" args={['#020305', 8.0, 95.0]} />
       
-      {/* Infinite cosmic particles (disabled in ENDING stage for pure black void) */}
-      {currentStage !== stages.ENDING && (
-        <Stars
-          radius={45}
-          depth={45}
-          count={800}
-          factor={3}
-          saturation={0}
-          fade
-          speed={0.8}
-        />
-      )}
+      {/* 3-Layer Spatial Void Depth Architecture */}
+      <VoidEnvironment />
 
       {currentStage === stages.OPENING && (
         <>
