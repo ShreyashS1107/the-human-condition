@@ -44,7 +44,7 @@ export function MuseumWorld({
         args={[
           activeRoom ? '#020305' : '#020305',
           activeRoom ? 6.0 : 8.0,
-          activeRoom ? 75.0 : 95.0,
+          activeRoom ? 75.0 : 105.0,
         ]}
       />
 

@@ -228,7 +228,7 @@ export function WorldContainer() {
   return (
     <>
       <color attach="background" args={['#000000']} />
-      <fog attach="fog" args={['#020305', 8.0, 95.0]} />
+      <fog attach="fog" args={['#020305', 8.0, 105.0]} />
       
       {/* 3-Layer Spatial Void Depth Architecture */}
       <VoidEnvironment />

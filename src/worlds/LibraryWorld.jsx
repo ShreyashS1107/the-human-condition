@@ -242,7 +242,7 @@ export function LibraryWorld({
         args={[
           activePhilosopher ? '#020204' : '#030305',
           activePhilosopher ? 6.0 : 8.0,
-          activePhilosopher ? 75.0 : 95.0,
+          activePhilosopher ? 75.0 : 105.0,
         ]}
       />
 

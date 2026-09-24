@@ -4,18 +4,19 @@ import * as THREE from 'three';
 import { useExperience } from '../hooks/useExperience';
 
 /**
- * VOID ENVIRONMENT — PASS 04: THE DISTANT MONUMENT
+ * VOID ENVIRONMENT — PASS 05: LIGHT BETWEEN THE RUINS
  * 
- * 1. Three Depth Layers (Foreground, Midground, Background)
- * 2. Ancient Imperfect Architectural Remnants (Columns, Arches, Entablatures, Portals)
- * 3. Hero Architecture: The Cyclopean Great Staircase & Broken Void Portal
- * 4. Physical Floating Manuscript Fragments of Human Thought (Parchment & Faded Inscriptions)
- * 5. Pass 04 Addition: The Distant Colossus Monument
- *    - Colossal, ancient, partially destroyed abstract human-form sculpture in extreme distance (Z: -90)
- *    - Seated on a cyclopean throne plinth with broken limb and sheared crown
- *    - Faceless, weathered, mysterious visual landmark looming in the deep fog
- *    - Completely static, unlit by spotlights, discovered gradually through ambient/directional falloff
- *    - Visual storytelling: Architecture (built) + Manuscripts (thought) + Monument (humanity looking at itself) + Darkness (lost)
+ * 1. Indirect Atmospheric Light & Soft Falloff (Unseen distant light origin, no spotlights)
+ * 2. Material Separation & Physical Response:
+ *    - Aged Stone: Soft diffuse gradient response
+ *    - Dark Basalt: Light-absorbing deep shadow anchors
+ *    - Weathered Stone: Soft uneven edge grazing on mouldings & fractures
+ *    - Oxidized Bronze: Subtle metallic specular catch on masonry cramps
+ *    - Parchment: Warmer, softer physical paper response
+ * 3. Atmospheric Depth & Progressive Dissolution into Darkness:
+ *    Foreground -> Midground -> Background -> Deep Background -> Infinite Black
+ * 4. Hero Elements Subtlety (Colossus & Great Staircase emerge organically through light falloff)
+ * 5. Active Subject Protection: Background becomes quieter while maintaining world presence
  */
 
 // ============================================================================
@@ -31,24 +32,24 @@ function createParchmentCanvas(text, subtitle, hasDiagram = false) {
   const ctx = canvas.getContext('2d');
 
   // Base Aged Parchment Tone
-  ctx.fillStyle = '#b8a98f';
+  ctx.fillStyle = '#bdae94';
   ctx.fillRect(0, 0, 512, 700);
 
   // Subtle Aged Vignette / Weathering
   const grad = ctx.createRadialGradient(256, 350, 80, 256, 350, 360);
-  grad.addColorStop(0, 'rgba(215, 203, 180, 0.6)');
-  grad.addColorStop(0.7, 'rgba(175, 158, 132, 0.4)');
-  grad.addColorStop(1, 'rgba(95, 82, 65, 0.85)');
+  grad.addColorStop(0, 'rgba(218, 207, 185, 0.65)');
+  grad.addColorStop(0.7, 'rgba(175, 158, 132, 0.45)');
+  grad.addColorStop(1, 'rgba(92, 79, 62, 0.88)');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 512, 700);
 
   // Weathered Deckled Edge Darkening
-  ctx.strokeStyle = '#5a4d3c';
+  ctx.strokeStyle = '#524535';
   ctx.lineWidth = 14;
   ctx.strokeRect(6, 6, 500, 688);
 
   // Faint Ink Rules / Guide Lines
-  ctx.strokeStyle = 'rgba(120, 105, 88, 0.25)';
+  ctx.strokeStyle = 'rgba(115, 100, 82, 0.28)';
   ctx.lineWidth = 1.0;
   for (let y = 110; y < 650; y += 32) {
     ctx.beginPath();
@@ -59,7 +60,7 @@ function createParchmentCanvas(text, subtitle, hasDiagram = false) {
 
   // Optional Ancient Geometric / Compass Diagram
   if (hasDiagram) {
-    ctx.strokeStyle = 'rgba(75, 62, 50, 0.35)';
+    ctx.strokeStyle = 'rgba(72, 60, 48, 0.38)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(380, 540, 55, 0, Math.PI * 2);
@@ -74,7 +75,7 @@ function createParchmentCanvas(text, subtitle, hasDiagram = false) {
   }
 
   // Faint Simulated Cursive Lines (lost handwriting)
-  ctx.fillStyle = 'rgba(58, 47, 36, 0.45)';
+  ctx.fillStyle = 'rgba(54, 44, 34, 0.48)';
   for (let y = 142; y < 620; y += 32) {
     let x = 45;
     while (x < 460) {
@@ -86,16 +87,16 @@ function createParchmentCanvas(text, subtitle, hasDiagram = false) {
     }
   }
 
-  // Main Philosophical Query / Heading Text (if specified)
+  // Main Philosophical Query / Heading Text
   if (text) {
-    ctx.fillStyle = '#231b14';
+    ctx.fillStyle = '#221a13';
     ctx.font = 'bold 34px "Cinzel", "Times New Roman", Georgia, serif';
     ctx.textAlign = 'center';
     ctx.letterSpacing = '3px';
     ctx.fillText(text, 256, 175);
 
     if (subtitle) {
-      ctx.fillStyle = 'rgba(50, 40, 30, 0.75)';
+      ctx.fillStyle = 'rgba(48, 38, 28, 0.78)';
       ctx.font = 'italic 20px "Cormorant Garamond", Georgia, serif';
       ctx.fillText(subtitle, 256, 215);
     }
@@ -173,10 +174,10 @@ function ForegroundAtmosphere({ isEncounterActive }) {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.03}
-        color="#827b72"
+        size={0.028}
+        color="#787166"
         transparent
-        opacity={isEncounterActive ? 0.10 : 0.20}
+        opacity={isEncounterActive ? 0.09 : 0.18}
         blending={THREE.NormalBlending}
         depthWrite={false}
       />
@@ -372,21 +373,22 @@ function FloatingManuscripts({ isEncounterActive }) {
     };
   }, []);
 
+  // Material separation: Parchment has softer diffuse and subtle warmth
   const materials = useMemo(() => {
     const mats = {};
     Object.keys(textures).forEach((key) => {
       mats[key] = new THREE.MeshStandardMaterial({
         map: textures[key],
-        roughness: 0.85,
-        metalness: 0.04,
+        roughness: 0.76,
+        metalness: 0.02,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.82,
+        opacity: isEncounterActive ? 0.45 : 0.84,
         shadowSide: THREE.DoubleSide,
       });
     });
     return mats;
-  }, [textures]);
+  }, [textures, isEncounterActive]);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
@@ -658,45 +660,33 @@ function MidgroundArchitecture({ materials }) {
 // 5. PASS 04: THE DISTANT MONUMENT (COLOSSAL HUMAN-FORM SCULPTURE)
 // ============================================================================
 
-/**
- * An immense, ancient, partially destroyed abstract human-form sculpture.
- * Placed in the extreme distance (Z: -92m, X: -32m) opposite the Great Staircase.
- * Suggests a colossal seated figure whose upper body/head fades into the dark ceilingless fog.
- * Weathered stone, faceless, fractured shoulder/arm, non-emissive, completely static.
- */
 function DistantColossusMonument({ materials }) {
   const { darkBasalt, distantStone, weatheredStone } = materials;
 
   return (
     <group position={[-32, 0, -92]} rotation={[0, 0.22, 0]} name="DistantColossusMonument">
       {/* 1. Colossal Stepped Throne Pedestal */}
-      {/* Lowest Plinth Block */}
       <mesh position={[0, -8.0, 0]} material={darkBasalt}>
         <boxGeometry args={[36.0, 6.0, 30.0]} />
       </mesh>
-      {/* Stepped Upper Pedestal Tier */}
       <mesh position={[0, -3.5, 0]} material={distantStone}>
         <boxGeometry args={[28.0, 4.0, 24.0]} />
       </mesh>
-      {/* Monolithic Throne Backrest Slab (rising behind the figure) */}
       <mesh position={[0, 26.0, -5.5]} material={darkBasalt}>
         <boxGeometry args={[20.0, 65.0, 5.5]} />
       </mesh>
 
       {/* 2. Seated Lower Body & Draped Monolithic Masses */}
-      {/* Central Lap / Throne Base Mass */}
       <mesh position={[0, 3.5, 3.0]} material={distantStone}>
         <boxGeometry args={[18.0, 14.0, 16.0]} />
       </mesh>
-      {/* Intact Left Leg / Knee Mass extending forward */}
       <mesh position={[-5.5, 1.0, 7.5]} material={distantStone}>
         <boxGeometry args={[6.5, 16.0, 10.0]} />
       </mesh>
-      {/* Severed / Fractured Right Leg Stump (shattered at knee level) */}
       <mesh position={[5.5, -3.2, 5.0]} material={distantStone}>
         <boxGeometry args={[6.5, 8.0, 7.0]} />
       </mesh>
-      {/* Dislodged Fallen Knee Block resting angled on plinth */}
+      {/* Dislodged Fallen Knee Block */}
       <mesh
         position={[6.8, -5.2, 9.2]}
         rotation={[0.18, 0.35, -0.12]}
@@ -706,11 +696,9 @@ function DistantColossusMonument({ materials }) {
       </mesh>
 
       {/* 3. Colossal Torso & Shoulders */}
-      {/* Main Monumental Torso */}
       <mesh position={[0, 24.0, 0]} rotation={[-0.03, 0, 0]} material={distantStone}>
         <boxGeometry args={[19.5, 26.0, 11.0]} />
       </mesh>
-      {/* Chiseled Pectoral Plane */}
       <mesh position={[0, 30.5, 4.5]} material={distantStone}>
         <boxGeometry args={[16.5, 9.5, 3.0]} />
       </mesh>
@@ -719,12 +707,11 @@ function DistantColossusMonument({ materials }) {
       <mesh position={[-11.2, 33.5, 0]} material={distantStone}>
         <boxGeometry args={[8.5, 8.5, 9.0]} />
       </mesh>
-      {/* Left Forearm resting on lap */}
       <mesh position={[-11.5, 20.5, 2.5]} material={distantStone}>
         <boxGeometry args={[5.0, 18.0, 5.5]} />
       </mesh>
 
-      {/* Fractured Right Shoulder (severed at upper bicep with exposed fracture wedge) */}
+      {/* Fractured Right Shoulder */}
       <mesh position={[10.5, 32.5, 0]} material={distantStone}>
         <boxGeometry args={[7.5, 6.5, 8.0]} />
       </mesh>
@@ -737,19 +724,17 @@ function DistantColossusMonument({ materials }) {
       </mesh>
 
       {/* 4. Colossal Faceless Head & Weathered Visage */}
-      {/* Monumental Neck */}
       <mesh position={[0, 38.5, 0]} material={distantStone}>
         <cylinderGeometry args={[3.0, 3.6, 6.0, 14]} />
       </mesh>
-      {/* Faceless Cranium / Weathered Head Mass */}
       <mesh position={[0, 46.5, 1.0]} material={distantStone}>
         <boxGeometry args={[8.5, 12.0, 9.5]} />
       </mesh>
-      {/* Chiseled Monolithic Brow & Jawline Plane (faceless, abstract ancient idol) */}
+      {/* Brow & Jawline Plane - Weathered stone catches faint indirect grazing */}
       <mesh position={[0, 44.5, 4.8]} material={weatheredStone}>
         <boxGeometry args={[7.2, 6.5, 3.8]} />
       </mesh>
-      {/* Fractured Head Crown (sheared top stone fading into void darkness) */}
+      {/* Fractured Head Crown */}
       <mesh
         position={[1.2, 53.0, 0.5]}
         rotation={[0.08, 0.18, -0.06]}
@@ -808,7 +793,7 @@ function BackgroundArchitecture({ materials }) {
         </group>
       </group>
 
-      {/* HERO STRUCTURE 2 (PASS 04): THE DISTANT COLOSSUS MONUMENT */}
+      {/* HERO STRUCTURE 2: THE DISTANT COLOSSUS MONUMENT */}
       <DistantColossusMonument materials={materials} />
 
       {/* FAR LEFT: Distant Hypostyle Pillars & Towering Architrave Beams */}
@@ -859,32 +844,38 @@ function BackgroundArchitecture({ materials }) {
 export function VoidEnvironment() {
   const { currentStage, stages, activeRoomId, activePhilosopherId, inspectingBook } = useExperience();
 
+  // PASS 05: Refined Material Separation with Precise Physical Responses
   const materials = useMemo(() => {
     return {
+      // 1. Aged Stone (Midground standing columns, architraves, portals) - Soft diffuse gradient
       agedStone: new THREE.MeshStandardMaterial({
-        color: '#0a0b0e',
-        roughness: 0.92,
+        color: '#12141a',
+        roughness: 0.86,
         metalness: 0.04,
       }),
+      // 2. Dark Basalt (Subterranean foundations, throne base, plinths) - Absorbs light
       darkBasalt: new THREE.MeshStandardMaterial({
-        color: '#050608',
-        roughness: 0.98,
+        color: '#060709',
+        roughness: 0.97,
         metalness: 0.02,
       }),
+      // 3. Weathered Stone (Mouldings, reveals, Colossus brow/shoulder) - Soft uneven edge response
       weatheredStone: new THREE.MeshStandardMaterial({
-        color: '#0e1014',
-        roughness: 0.88,
-        metalness: 0.06,
+        color: '#1b1e25',
+        roughness: 0.78,
+        metalness: 0.05,
       }),
+      // 4. Distant Stone (Colossus mass, Great Staircase, distant pillars) - Dissolves into fog
       distantStone: new THREE.MeshStandardMaterial({
-        color: '#050608',
+        color: '#07080b',
         roughness: 0.98,
-        metalness: 0.02,
+        metalness: 0.01,
       }),
+      // 5. Oxidized Antique Bronze (Joinery cramps, mortise pins) - Subtle specular gleam
       bronze: new THREE.MeshStandardMaterial({
-        color: '#2a241b',
-        roughness: 0.62,
-        metalness: 0.82,
+        color: '#382f22',
+        roughness: 0.46,
+        metalness: 0.88,
       }),
     };
   }, []);
@@ -897,13 +888,34 @@ export function VoidEnvironment() {
 
   return (
     <group name="VoidEnvironment">
-      {/* 1. FOREGROUND LAYER: Sparse Atmospheric Dust */}
+      {/* PASS 05: Vast Indirect Environmental Light Falloff (Unseen distant origin, no spotlights) */}
+      <directionalLight
+        position={[-18, 32, 14]}
+        intensity={isEncounterActive ? 0.26 : 0.46}
+        color="#ebe3d5"
+        castShadow
+        shadow-mapSize={[1024, 1024]}
+        shadow-bias={-0.0001}
+      />
+      {/* Subtle Sky/Ground Hemisphere Ambient: Slate night sky to deep obsidian ground */}
+      <hemisphereLight
+        args={['#141820', '#040507', isEncounterActive ? 0.09 : 0.15]}
+      />
+      {/* Faint far-depth ambient fill to softly separate midground from deep void */}
+      <pointLight
+        position={[12, -4, -40]}
+        intensity={0.16}
+        distance={65}
+        color="#1a1d24"
+      />
+
+      {/* 1. FOREGROUND LAYER: Atmospheric Dust */}
       <ForegroundAtmosphere isEncounterActive={isEncounterActive} />
 
       {/* 2. MIDGROUND LAYER: Ancient Imperfect Architectural Remnants */}
       <MidgroundArchitecture materials={materials} />
 
-      {/* 3. BACKGROUND LAYER: Distant Monumental Ruins, The Great Staircase & The Distant Colossus */}
+      {/* 3. BACKGROUND LAYER: Distant Ruins, The Great Staircase & The Distant Colossus */}
       <BackgroundArchitecture materials={materials} />
 
       {/* 4. PHYSICAL FLOATING MANUSCRIPTS: Fragments of Human Thought */}
