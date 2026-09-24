@@ -4,19 +4,19 @@ import * as THREE from 'three';
 import { useExperience } from '../hooks/useExperience';
 
 /**
- * VOID ENVIRONMENT — PASS 05: LIGHT BETWEEN THE RUINS
+ * VOID ENVIRONMENT — PASS 06A: THE VOID REMEMBERS — LIBRARY TRACE
  * 
- * 1. Indirect Atmospheric Light & Soft Falloff (Unseen distant light origin, no spotlights)
- * 2. Material Separation & Physical Response:
- *    - Aged Stone: Soft diffuse gradient response
- *    - Dark Basalt: Light-absorbing deep shadow anchors
- *    - Weathered Stone: Soft uneven edge grazing on mouldings & fractures
- *    - Oxidized Bronze: Subtle metallic specular catch on masonry cramps
- *    - Parchment: Warmer, softer physical paper response
- * 3. Atmospheric Depth & Progressive Dissolution into Darkness:
- *    Foreground -> Midground -> Background -> Deep Background -> Infinite Black
- * 4. Hero Elements Subtlety (Colossus & Great Staircase emerge organically through light falloff)
- * 5. Active Subject Protection: Background becomes quieter while maintaining world presence
+ * 1. Three Depth Layers (Foreground, Midground, Background)
+ * 2. Ancient Imperfect Architectural Remnants (Columns, Arches, Entablatures, Portals)
+ * 3. Hero Architecture: The Cyclopean Great Staircase & Broken Void Portal
+ * 4. The Distant Colossus Monument (Extreme distance Z: -92m)
+ * 5. Physical Floating Manuscripts of Human Thought (14 deterministic fragments)
+ * 6. Pass 06A Addition: The Void Remembers (Library Trace)
+ *    - After the user has visited / interacted with the Library of Human Thought:
+ *      3–4 specific existing manuscript fragments subtly change behavior
+ *    - A gentle, delayed counter-current drift and slight orientation shift
+ *    - Handwriting feels subtly resurfaced ("thoughts that have been disturbed")
+ *    - Remaining 10+ fragments behave as before; no swarming, no flying, zero UI
  */
 
 // ============================================================================
@@ -186,7 +186,7 @@ function ForegroundAtmosphere({ isEncounterActive }) {
 }
 
 // ============================================================================
-// 3. LAYER: FLOATING MANUSCRIPT FRAGMENTS OF HUMAN THOUGHT
+// 3. LAYER: FLOATING MANUSCRIPT FRAGMENTS (WITH LIBRARY TRACE MEMORY)
 // ============================================================================
 
 const MANUSCRIPT_ITEMS = [
@@ -201,6 +201,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: true,
     speed: 0.25,
     phase: 0.4,
+    isLibraryResponsive: false,
   },
   {
     id: 'fg-2',
@@ -212,9 +213,11 @@ const MANUSCRIPT_ITEMS = [
     hasFold: false,
     speed: 0.3,
     phase: 1.8,
+    isLibraryResponsive: false,
   },
 
   // --- MIDGROUND FRAGMENTS (6 items: near columns, arch, wall remnants) ---
+  // Responsive Item 1: Near left broken architrave
   {
     id: 'mg-1',
     layer: 'MIDGROUND',
@@ -225,6 +228,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: true,
     speed: 0.22,
     phase: 2.5,
+    isLibraryResponsive: true,
   },
   {
     id: 'mg-2',
@@ -236,7 +240,9 @@ const MANUSCRIPT_ITEMS = [
     hasFold: false,
     speed: 0.28,
     phase: 4.1,
+    isLibraryResponsive: false,
   },
+  // Responsive Item 2: Floating high in colonnade opening
   {
     id: 'mg-3',
     layer: 'MIDGROUND',
@@ -247,6 +253,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: true,
     speed: 0.2,
     phase: 0.9,
+    isLibraryResponsive: true,
   },
   {
     id: 'mg-4',
@@ -258,6 +265,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: false,
     speed: 0.26,
     phase: 3.2,
+    isLibraryResponsive: false,
   },
   {
     id: 'mg-5',
@@ -269,6 +277,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: true,
     speed: 0.24,
     phase: 5.0,
+    isLibraryResponsive: false,
   },
   {
     id: 'mg-6',
@@ -280,9 +289,11 @@ const MANUSCRIPT_ITEMS = [
     hasFold: false,
     speed: 0.18,
     phase: 1.3,
+    isLibraryResponsive: false,
   },
 
   // --- BACKGROUND FRAGMENTS (6 items: distant monumental scale) ---
+  // Responsive Item 3: Near Great Staircase
   {
     id: 'bg-1',
     layer: 'BACKGROUND',
@@ -293,6 +304,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: false,
     speed: 0.15,
     phase: 2.1,
+    isLibraryResponsive: true,
   },
   {
     id: 'bg-2',
@@ -304,6 +316,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: true,
     speed: 0.18,
     phase: 4.6,
+    isLibraryResponsive: false,
   },
   {
     id: 'bg-3',
@@ -315,7 +328,9 @@ const MANUSCRIPT_ITEMS = [
     hasFold: false,
     speed: 0.14,
     phase: 0.7,
+    isLibraryResponsive: false,
   },
+  // Responsive Item 4: High in distant hypostyle ruins
   {
     id: 'bg-4',
     layer: 'BACKGROUND',
@@ -326,6 +341,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: true,
     speed: 0.16,
     phase: 3.8,
+    isLibraryResponsive: true,
   },
   {
     id: 'bg-5',
@@ -337,6 +353,7 @@ const MANUSCRIPT_ITEMS = [
     hasFold: false,
     speed: 0.12,
     phase: 5.5,
+    isLibraryResponsive: false,
   },
   {
     id: 'bg-6',
@@ -348,11 +365,13 @@ const MANUSCRIPT_ITEMS = [
     hasFold: false,
     speed: 0.15,
     phase: 1.9,
+    isLibraryResponsive: false,
   },
 ];
 
-function FloatingManuscripts({ isEncounterActive }) {
+function FloatingManuscripts({ isEncounterActive, hasLibraryMemory }) {
   const groupRef = useRef();
+  const memoryProgressRef = useRef(0);
 
   const textures = useMemo(() => {
     return {
@@ -373,7 +392,6 @@ function FloatingManuscripts({ isEncounterActive }) {
     };
   }, []);
 
-  // Material separation: Parchment has softer diffuse and subtle warmth
   const materials = useMemo(() => {
     const mats = {};
     Object.keys(textures).forEach((key) => {
@@ -383,26 +401,51 @@ function FloatingManuscripts({ isEncounterActive }) {
         metalness: 0.02,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: isEncounterActive ? 0.45 : 0.84,
+        opacity: isEncounterActive ? 0.45 : hasLibraryMemory ? 0.88 : 0.82,
         shadowSide: THREE.DoubleSide,
       });
     });
     return mats;
-  }, [textures, isEncounterActive]);
+  }, [textures, isEncounterActive, hasLibraryMemory]);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     const time = state.clock.elapsedTime;
     const speedMult = isEncounterActive ? 0.35 : 1.0;
 
+    // Smooth deterministic transition of library memory influence
+    const targetMemory = hasLibraryMemory ? 1.0 : 0.0;
+    memoryProgressRef.current = THREE.MathUtils.damp(
+      memoryProgressRef.current,
+      targetMemory,
+      0.5,
+      delta
+    );
+    const mem = memoryProgressRef.current;
+
     groupRef.current.children.forEach((child, i) => {
       const item = MANUSCRIPT_ITEMS[i];
       if (!item) return;
 
-      child.position.y = item.pos[1] + Math.sin(time * item.speed * speedMult + item.phase) * 0.08;
-      child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
-      child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
-      child.rotation.y += delta * 0.02 * speedMult * (i % 2 === 0 ? 1 : -1);
+      if (item.isLibraryResponsive && mem > 0.01) {
+        // Subtle disturbed drift: secondary counter-current wave & slight yaw orientation shift
+        const memWaveY = Math.sin(time * 0.38 + item.phase) * (0.04 * mem);
+        const memDriftX = Math.cos(time * 0.28 + item.phase) * (0.035 * mem);
+        const memYawOffset = 0.12 * mem;
+
+        child.position.x = item.pos[0] + memDriftX * speedMult;
+        child.position.y = item.pos[1] + Math.sin(time * (item.speed + 0.05 * mem) * speedMult + item.phase) * 0.08 + memWaveY * speedMult;
+        child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
+        child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
+        child.rotation.y += delta * (0.02 + 0.008 * mem) * speedMult * (i % 2 === 0 ? 1 : -1) + (memYawOffset * 0.015);
+      } else {
+        // Standard serene baseline drift
+        child.position.x = item.pos[0];
+        child.position.y = item.pos[1] + Math.sin(time * item.speed * speedMult + item.phase) * 0.08;
+        child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
+        child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
+        child.rotation.y += delta * 0.02 * speedMult * (i % 2 === 0 ? 1 : -1);
+      }
     });
   });
 
@@ -686,7 +729,6 @@ function DistantColossusMonument({ materials }) {
       <mesh position={[5.5, -3.2, 5.0]} material={distantStone}>
         <boxGeometry args={[6.5, 8.0, 7.0]} />
       </mesh>
-      {/* Dislodged Fallen Knee Block */}
       <mesh
         position={[6.8, -5.2, 9.2]}
         rotation={[0.18, 0.35, -0.12]}
@@ -730,11 +772,9 @@ function DistantColossusMonument({ materials }) {
       <mesh position={[0, 46.5, 1.0]} material={distantStone}>
         <boxGeometry args={[8.5, 12.0, 9.5]} />
       </mesh>
-      {/* Brow & Jawline Plane - Weathered stone catches faint indirect grazing */}
       <mesh position={[0, 44.5, 4.8]} material={weatheredStone}>
         <boxGeometry args={[7.2, 6.5, 3.8]} />
       </mesh>
-      {/* Fractured Head Crown */}
       <mesh
         position={[1.2, 53.0, 0.5]}
         rotation={[0.08, 0.18, -0.06]}
@@ -842,36 +882,44 @@ function BackgroundArchitecture({ materials }) {
 // ============================================================================
 
 export function VoidEnvironment() {
-  const { currentStage, stages, activeRoomId, activePhilosopherId, inspectingBook } = useExperience();
+  const {
+    currentStage,
+    stages,
+    activeRoomId,
+    activePhilosopherId,
+    inspectingBook,
+    visitedPhilosophers,
+    discoveredBooks,
+  } = useExperience();
 
-  // PASS 05: Refined Material Separation with Precise Physical Responses
+  // PASS 06A: Memory Trace of Library of Human Thought
+  const hasLibraryMemory = Boolean(
+    (visitedPhilosophers && visitedPhilosophers.length > 0) ||
+    (discoveredBooks && discoveredBooks.length > 0)
+  );
+
   const materials = useMemo(() => {
     return {
-      // 1. Aged Stone (Midground standing columns, architraves, portals) - Soft diffuse gradient
       agedStone: new THREE.MeshStandardMaterial({
         color: '#12141a',
         roughness: 0.86,
         metalness: 0.04,
       }),
-      // 2. Dark Basalt (Subterranean foundations, throne base, plinths) - Absorbs light
       darkBasalt: new THREE.MeshStandardMaterial({
         color: '#060709',
         roughness: 0.97,
         metalness: 0.02,
       }),
-      // 3. Weathered Stone (Mouldings, reveals, Colossus brow/shoulder) - Soft uneven edge response
       weatheredStone: new THREE.MeshStandardMaterial({
         color: '#1b1e25',
         roughness: 0.78,
         metalness: 0.05,
       }),
-      // 4. Distant Stone (Colossus mass, Great Staircase, distant pillars) - Dissolves into fog
       distantStone: new THREE.MeshStandardMaterial({
         color: '#07080b',
         roughness: 0.98,
         metalness: 0.01,
       }),
-      // 5. Oxidized Antique Bronze (Joinery cramps, mortise pins) - Subtle specular gleam
       bronze: new THREE.MeshStandardMaterial({
         color: '#382f22',
         roughness: 0.46,
@@ -888,7 +936,7 @@ export function VoidEnvironment() {
 
   return (
     <group name="VoidEnvironment">
-      {/* PASS 05: Vast Indirect Environmental Light Falloff (Unseen distant origin, no spotlights) */}
+      {/* Vast Indirect Environmental Light Falloff */}
       <directionalLight
         position={[-18, 32, 14]}
         intensity={isEncounterActive ? 0.26 : 0.46}
@@ -897,11 +945,9 @@ export function VoidEnvironment() {
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0001}
       />
-      {/* Subtle Sky/Ground Hemisphere Ambient: Slate night sky to deep obsidian ground */}
       <hemisphereLight
         args={['#141820', '#040507', isEncounterActive ? 0.09 : 0.15]}
       />
-      {/* Faint far-depth ambient fill to softly separate midground from deep void */}
       <pointLight
         position={[12, -4, -40]}
         intensity={0.16}
@@ -918,8 +964,11 @@ export function VoidEnvironment() {
       {/* 3. BACKGROUND LAYER: Distant Ruins, The Great Staircase & The Distant Colossus */}
       <BackgroundArchitecture materials={materials} />
 
-      {/* 4. PHYSICAL FLOATING MANUSCRIPTS: Fragments of Human Thought */}
-      <FloatingManuscripts isEncounterActive={isEncounterActive} />
+      {/* 4. PHYSICAL FLOATING MANUSCRIPTS (PASS 06A: With Library Trace Memory) */}
+      <FloatingManuscripts
+        isEncounterActive={isEncounterActive}
+        hasLibraryMemory={hasLibraryMemory}
+      />
     </group>
   );
 }
