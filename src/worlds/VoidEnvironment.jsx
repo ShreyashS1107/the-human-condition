@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { useExperience } from '../hooks/useExperience';
 
 /**
- * VOID ENVIRONMENT — PASS 06C: THE VOID REMEMBERS — BOOK TRACE
+ * VOID ENVIRONMENT — PASS 06D: THE VOID REMEMBERS — NIETZSCHE PRELUDE (FINAL PASS)
  * 
  * 1. Three Depth Layers (Foreground, Midground, Background)
  * 2. Ancient Imperfect Architectural Remnants (Columns, Arches, Entablatures, Portals)
@@ -13,11 +13,14 @@ import { useExperience } from '../hooks/useExperience';
  * 5. Physical Floating Manuscripts of Human Thought (14 deterministic fragments)
  * 6. Pass 06A: The Void Remembers — Library Trace (Awakened thought, counter-current drift)
  * 7. Pass 06B: The Void Remembers — Museum Trace (Something has been physically disturbed)
- * 8. Pass 06C Addition: The Void Remembers — Book Trace (Something was remembered)
- *    - After meaningful Book interaction, 3 existing midground/background manuscript fragments
- *      resurface in memory: settling into calmer, clearer resting orientations with subtle
- *      opacity restoration, while dampening active oscillation (LIBRARY -> alive, BOOK -> remembered)
- *    - Completely non-looping, deterministic damping, zero new geometry, zero UI, zero injected user text
+ * 8. Pass 06C: The Void Remembers — Book Trace (Something was remembered)
+ * 9. Pass 06D Addition: The Void Remembers — Nietzsche Prelude (Loss of certainty)
+ *    - Immediately before/during transition into the Nietzsche Machine / Finale,
+ *      the void loses its geometric and atmospheric certainty.
+ *    - Subtle micro-misalignment on distant monument, staircase portal, and monolithic wall.
+ *    - Atmospheric breathing / subconscious lighting fluctuation.
+ *    - Established manuscript stability begins to gently un-anchor.
+ *    - Zero new geometry, zero UI, zero horror effects, purely psychological prelude.
  */
 
 // ============================================================================
@@ -383,10 +386,11 @@ const MANUSCRIPT_ITEMS = [
   },
 ];
 
-function FloatingManuscripts({ isEncounterActive, hasLibraryMemory, hasBookMemory }) {
+function FloatingManuscripts({ isEncounterActive, hasLibraryMemory, hasBookMemory, isNietzschePrelude }) {
   const groupRef = useRef();
   const libraryMemoryProgressRef = useRef(0);
   const bookMemoryProgressRef = useRef(0);
+  const nietzscheProgressRef = useRef(0);
 
   const textures = useMemo(() => {
     return {
@@ -459,32 +463,49 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory, hasBookMemor
     );
     const bookMem = bookMemoryProgressRef.current;
 
+    // Nietzsche prelude interpolation (PASS 06D)
+    const targetNietzscheMemory = isNietzschePrelude ? 1.0 : 0.0;
+    nietzscheProgressRef.current = THREE.MathUtils.damp(
+      nietzscheProgressRef.current,
+      targetNietzscheMemory,
+      0.3,
+      delta
+    );
+    const nietzscheMem = nietzscheProgressRef.current;
+
     groupRef.current.children.forEach((child, i) => {
       const item = MANUSCRIPT_ITEMS[i];
       if (!item) return;
 
       if (item.isLibraryResponsive && libMem > 0.01) {
         // PASS 06A: Awakened thought - lively counter-current drift & wave
-        const memWaveY = Math.sin(time * 0.38 + item.phase) * (0.04 * libMem);
-        const memDriftX = Math.cos(time * 0.28 + item.phase) * (0.035 * libMem);
-        const memYawOffset = 0.12 * libMem;
+        // PASS 06D: During Nietzsche prelude, counter-current frequency subtly desynchronizes
+        const deSync = nietzscheMem * 0.16;
+        const memWaveY = Math.sin(time * (0.38 + deSync) + item.phase) * (0.04 * libMem);
+        const memDriftX = Math.cos(time * (0.28 - deSync) + item.phase) * (0.035 * libMem);
+        const memYawOffset = (0.12 + Math.sin(time * 0.15) * 0.05 * nietzscheMem) * libMem;
 
         child.position.x = item.pos[0] + memDriftX * speedMult;
         child.position.y = item.pos[1] + Math.sin(time * (item.speed + 0.05 * libMem) * speedMult + item.phase) * 0.08 + memWaveY * speedMult;
         child.position.z = item.pos[2];
-        child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
-        child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
+        child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04 + (Math.sin(time * 0.2) * 0.025 * nietzscheMem);
+        child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03 + (Math.cos(time * 0.16) * 0.02 * nietzscheMem);
         child.rotation.y += delta * (0.02 + 0.008 * libMem) * speedMult * (i % 2 === 0 ? 1 : -1) + (memYawOffset * 0.015);
       } else if (item.isBookResponsive && bookMem > 0.01) {
         // PASS 06C: Memory Resurfacing - calmer, settled resting orientation & subtle positional presence
+        // PASS 06D: During Nietzsche prelude, settled resting state gently loses absolute certainty
         const calmSpeed = item.speed * (1.0 - 0.55 * bookMem);
         const calmWaveAmp = 0.08 * (1.0 - 0.65 * bookMem);
         const offsetX = (item.bookOffset ? item.bookOffset[0] : 0.06) * bookMem;
         const offsetY = (item.bookOffset ? item.bookOffset[1] : 0.08) * bookMem;
         const offsetZ = (item.bookOffset ? item.bookOffset[2] : 0.12) * bookMem;
 
+        // Subtle un-settling drift during prelude
+        const driftY = Math.sin(time * 0.22 + item.phase) * (0.035 * nietzscheMem);
+        const driftRoll = Math.cos(time * 0.18 + item.phase) * (0.028 * nietzscheMem);
+
         child.position.x = item.pos[0] + offsetX;
-        child.position.y = item.pos[1] + Math.sin(time * calmSpeed * speedMult + item.phase) * calmWaveAmp + offsetY;
+        child.position.y = item.pos[1] + Math.sin(time * calmSpeed * speedMult + item.phase) * calmWaveAmp + offsetY + driftY;
         child.position.z = item.pos[2] + offsetZ;
 
         // Settles into clearer, calmer, more front-facing resting angle
@@ -493,7 +514,7 @@ function FloatingManuscripts({ isEncounterActive, hasLibraryMemory, hasBookMemor
         const targetRotZ = THREE.MathUtils.lerp(item.rot[2], item.bookTargetRot[2], bookMem);
 
         child.rotation.x = targetRotX + Math.sin(time * 0.15 * speedMult + item.phase) * (0.015 * (1.0 - 0.6 * bookMem));
-        child.rotation.z = targetRotZ + Math.cos(time * 0.12 * speedMult + item.phase) * (0.012 * (1.0 - 0.6 * bookMem));
+        child.rotation.z = targetRotZ + Math.cos(time * 0.12 * speedMult + item.phase) * (0.012 * (1.0 - 0.6 * bookMem)) + driftRoll;
         child.rotation.y = THREE.MathUtils.lerp(child.rotation.y, targetRotY, 0.05) + delta * 0.004 * speedMult * (1.0 - 0.6 * bookMem);
       } else {
         child.position.x = item.pos[0];
@@ -629,26 +650,36 @@ function RuinedColumn({
   );
 }
 
-function MidgroundArchitecture({ materials, hasMuseumMemory }) {
+function MidgroundArchitecture({ materials, hasMuseumMemory, isNietzschePrelude }) {
   const { agedStone, darkBasalt, weatheredStone, bronze } = materials;
   const dislodgedBlockRef = useRef();
+  const rightPortalWallRef = useRef();
 
   useFrame((_, delta) => {
-    if (!dislodgedBlockRef.current) return;
-    // PASS 06B: Extremely slow structural settling / subtle offset on left fallen block
-    const targetX = hasMuseumMemory ? 7.64 : 7.5;
-    const targetY = hasMuseumMemory ? -4.28 : -4.2;
-    const targetZ = hasMuseumMemory ? 2.32 : 2.2;
-    const targetRotX = hasMuseumMemory ? 0.22 : 0.18;
-    const targetRotY = hasMuseumMemory ? 0.49 : 0.45;
-    const targetRotZ = hasMuseumMemory ? -0.09 : -0.12;
+    if (dislodgedBlockRef.current) {
+      // PASS 06B: Extremely slow structural settling / subtle offset on left fallen block
+      const targetX = hasMuseumMemory ? 7.64 : 7.5;
+      const targetY = hasMuseumMemory ? -4.28 : -4.2;
+      const targetZ = hasMuseumMemory ? 2.32 : 2.2;
+      const targetRotX = hasMuseumMemory ? 0.22 : 0.18;
+      const targetRotY = hasMuseumMemory ? 0.49 : 0.45;
+      const targetRotZ = hasMuseumMemory ? -0.09 : -0.12;
 
-    dislodgedBlockRef.current.position.x = THREE.MathUtils.damp(dislodgedBlockRef.current.position.x, targetX, 0.4, delta);
-    dislodgedBlockRef.current.position.y = THREE.MathUtils.damp(dislodgedBlockRef.current.position.y, targetY, 0.4, delta);
-    dislodgedBlockRef.current.position.z = THREE.MathUtils.damp(dislodgedBlockRef.current.position.z, targetZ, 0.4, delta);
-    dislodgedBlockRef.current.rotation.x = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.x, targetRotX, 0.4, delta);
-    dislodgedBlockRef.current.rotation.y = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.y, targetRotY, 0.4, delta);
-    dislodgedBlockRef.current.rotation.z = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.z, targetRotZ, 0.4, delta);
+      dislodgedBlockRef.current.position.x = THREE.MathUtils.damp(dislodgedBlockRef.current.position.x, targetX, 0.4, delta);
+      dislodgedBlockRef.current.position.y = THREE.MathUtils.damp(dislodgedBlockRef.current.position.y, targetY, 0.4, delta);
+      dislodgedBlockRef.current.position.z = THREE.MathUtils.damp(dislodgedBlockRef.current.position.z, targetZ, 0.4, delta);
+      dislodgedBlockRef.current.rotation.x = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.x, targetRotX, 0.4, delta);
+      dislodgedBlockRef.current.rotation.y = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.y, targetRotY, 0.4, delta);
+      dislodgedBlockRef.current.rotation.z = THREE.MathUtils.damp(dislodgedBlockRef.current.rotation.z, targetRotZ, 0.4, delta);
+    }
+
+    if (rightPortalWallRef.current) {
+      // PASS 06D: Nietzsche Prelude - subtle micro-misalignment on monolithic portal wall
+      const targetRotY = isNietzschePrelude ? -0.024 : 0;
+      const targetRotZ = isNietzschePrelude ? 0.012 : 0;
+      rightPortalWallRef.current.rotation.y = THREE.MathUtils.damp(rightPortalWallRef.current.rotation.y, targetRotY, 0.2, delta);
+      rightPortalWallRef.current.rotation.z = THREE.MathUtils.damp(rightPortalWallRef.current.rotation.z, targetRotZ, 0.2, delta);
+    }
   });
 
   return (
@@ -738,7 +769,7 @@ function MidgroundArchitecture({ materials, hasMuseumMemory }) {
       />
 
       {/* 3. RIGHT FLANK: Monumental Monolithic Portal Wall & Doorframe Remnants */}
-      <group position={[18, 0, -21]}>
+      <group ref={rightPortalWallRef} position={[18, 0, -21]}>
         <mesh position={[0, -3.5, 0]} material={darkBasalt} receiveShadow>
           <boxGeometry args={[8.5, 3.0, 5.0]} />
         </mesh>
@@ -804,11 +835,24 @@ function MidgroundArchitecture({ materials, hasMuseumMemory }) {
 // 5. PASS 04: THE DISTANT MONUMENT (COLOSSAL HUMAN-FORM SCULPTURE)
 // ============================================================================
 
-function DistantColossusMonument({ materials }) {
+function DistantColossusMonument({ materials, isNietzschePrelude }) {
   const { darkBasalt, distantStone, weatheredStone } = materials;
+  const monumentRef = useRef();
+
+  useFrame((_, delta) => {
+    if (!monumentRef.current) return;
+    // PASS 06D: Extremely subtle loss of geometric certainty - silhouette un-anchoring drift
+    const targetY = isNietzschePrelude ? -0.28 : 0;
+    const targetRotY = isNietzschePrelude ? 0.248 : 0.22;
+    const targetRotZ = isNietzschePrelude ? 0.016 : 0;
+
+    monumentRef.current.position.y = THREE.MathUtils.damp(monumentRef.current.position.y, targetY, 0.2, delta);
+    monumentRef.current.rotation.y = THREE.MathUtils.damp(monumentRef.current.rotation.y, targetRotY, 0.15, delta);
+    monumentRef.current.rotation.z = THREE.MathUtils.damp(monumentRef.current.rotation.z, targetRotZ, 0.15, delta);
+  });
 
   return (
-    <group position={[-32, 0, -92]} rotation={[0, 0.22, 0]} name="DistantColossusMonument">
+    <group ref={monumentRef} position={[-32, 0, -92]} rotation={[0, 0.22, 0]} name="DistantColossusMonument">
       {/* 1. Colossal Stepped Throne Pedestal */}
       <mesh position={[0, -8.0, 0]} material={darkBasalt}>
         <boxGeometry args={[36.0, 6.0, 30.0]} />
@@ -891,26 +935,36 @@ function DistantColossusMonument({ materials }) {
 // 6. LAYER 3: BACKGROUND MONUMENTAL RUINS + HERO STRUCTURES
 // ============================================================================
 
-function BackgroundArchitecture({ materials, hasMuseumMemory }) {
+function BackgroundArchitecture({ materials, hasMuseumMemory, isNietzschePrelude }) {
   const { darkBasalt, distantStone, weatheredStone } = materials;
   const archOverhangRef = useRef();
+  const staircaseArchRef = useRef();
 
   useFrame((_, delta) => {
-    if (!archOverhangRef.current) return;
-    // PASS 06B: Subtle gravitational settling tilt on fractured Great Arch lintel overhang
-    const targetRotX = hasMuseumMemory ? -0.02 : 0;
-    const targetRotY = hasMuseumMemory ? 0.145 : 0.12;
-    const targetRotZ = hasMuseumMemory ? -0.11 : -0.08;
+    if (archOverhangRef.current) {
+      // PASS 06B: Subtle gravitational settling tilt on fractured Great Arch lintel overhang
+      const targetRotX = hasMuseumMemory ? -0.02 : 0;
+      const targetRotY = hasMuseumMemory ? 0.145 : 0.12;
+      const targetRotZ = hasMuseumMemory ? -0.11 : -0.08;
 
-    archOverhangRef.current.rotation.x = THREE.MathUtils.damp(archOverhangRef.current.rotation.x, targetRotX, 0.35, delta);
-    archOverhangRef.current.rotation.y = THREE.MathUtils.damp(archOverhangRef.current.rotation.y, targetRotY, 0.35, delta);
-    archOverhangRef.current.rotation.z = THREE.MathUtils.damp(archOverhangRef.current.rotation.z, targetRotZ, 0.35, delta);
+      archOverhangRef.current.rotation.x = THREE.MathUtils.damp(archOverhangRef.current.rotation.x, targetRotX, 0.35, delta);
+      archOverhangRef.current.rotation.y = THREE.MathUtils.damp(archOverhangRef.current.rotation.y, targetRotY, 0.35, delta);
+      archOverhangRef.current.rotation.z = THREE.MathUtils.damp(archOverhangRef.current.rotation.z, targetRotZ, 0.35, delta);
+    }
+
+    if (staircaseArchRef.current) {
+      // PASS 06D: Nietzsche Prelude - subtle micro-shift on the Cyclopean Staircase & Void Portal alignment
+      const targetPosX = isNietzschePrelude ? 14.15 : 14.0;
+      const targetRotZ = isNietzschePrelude ? -0.012 : 0.0;
+      staircaseArchRef.current.position.x = THREE.MathUtils.damp(staircaseArchRef.current.position.x, targetPosX, 0.2, delta);
+      staircaseArchRef.current.rotation.z = THREE.MathUtils.damp(staircaseArchRef.current.rotation.z, targetRotZ, 0.2, delta);
+    }
   });
 
   return (
     <group name="BackgroundMonuments">
       {/* HERO STRUCTURE 1: THE CYCLOPEAN GREAT STAIRCASE & BROKEN VOID PORTAL */}
-      <group position={[14, 0, -74]}>
+      <group ref={staircaseArchRef} position={[14, 0, -74]}>
         {Array.from({ length: 6 }).map((_, stepIdx) => {
           const stepY = stepIdx * 2.2 - 6.0;
           const stepZ = -stepIdx * 2.8;
@@ -950,7 +1004,7 @@ function BackgroundArchitecture({ materials, hasMuseumMemory }) {
       </group>
 
       {/* HERO STRUCTURE 2: THE DISTANT COLOSSUS MONUMENT */}
-      <DistantColossusMonument materials={materials} />
+      <DistantColossusMonument materials={materials} isNietzschePrelude={isNietzschePrelude} />
 
       {/* FAR LEFT: Distant Hypostyle Pillars & Towering Architrave Beams */}
       <mesh position={[-36, 18.0, -64]} material={distantStone}>
@@ -1009,7 +1063,11 @@ export function VoidEnvironment() {
     visitedMuseumRooms,
     bookAnswers,
     philosophicalLetter,
+    bookWorldState,
+    finaleState,
   } = useExperience();
+
+  const isEncounterActive = Boolean(activeRoomId || activePhilosopherId || inspectingBook);
 
   // PASS 06A: Memory Trace of Library of Human Thought (Awakened thoughts)
   const hasLibraryMemory = Boolean(
@@ -1027,6 +1085,57 @@ export function VoidEnvironment() {
     (bookAnswers && Object.keys(bookAnswers).length > 0) ||
     philosophicalLetter
   );
+
+  // PASS 06D: Nietzsche Machine Prelude (Loss of geometric and atmospheric certainty)
+  // Activates ONLY during the genuine transition into the Finale / Nietzsche Machine
+  const isNietzschePrelude = Boolean(
+    !isEncounterActive && (
+      (currentStage === stages.BOOK && bookWorldState?.cameraMode === 'CLOSING') ||
+      (currentStage === stages.FINALE && (finaleState?.phase === 'INTRO_1' || finaleState?.phase === 'INTRO_2' || !finaleState?.phase))
+    )
+  );
+
+  const dirLightRef = useRef();
+  const hemiLightRef = useRef();
+  const pointLightRef = useRef();
+
+  useFrame((state, delta) => {
+    if (!dirLightRef.current || !hemiLightRef.current) return;
+    const time = state.clock.elapsedTime;
+
+    let targetDirIntensity = isEncounterActive ? 0.26 : 0.46;
+    let targetHemiIntensity = isEncounterActive ? 0.09 : 0.15;
+    let targetPointIntensity = isEncounterActive ? 0.08 : 0.16;
+
+    if (isNietzschePrelude) {
+      // PASS 06D: Subtle temporal light fluctuation / atmospheric breathing (foreshadowing)
+      const breath = Math.sin(time * 0.32) * 0.035 + Math.cos(time * 0.18) * 0.02;
+      targetDirIntensity = 0.36 + breath;
+      targetHemiIntensity = 0.11 + breath * 0.4;
+      targetPointIntensity = 0.12 + breath * 0.3;
+    }
+
+    dirLightRef.current.intensity = THREE.MathUtils.damp(
+      dirLightRef.current.intensity,
+      targetDirIntensity,
+      0.4,
+      delta
+    );
+    hemiLightRef.current.intensity = THREE.MathUtils.damp(
+      hemiLightRef.current.intensity,
+      targetHemiIntensity,
+      0.4,
+      delta
+    );
+    if (pointLightRef.current) {
+      pointLightRef.current.intensity = THREE.MathUtils.damp(
+        pointLightRef.current.intensity,
+        targetPointIntensity,
+        0.4,
+        delta
+      );
+    }
+  });
 
   const materials = useMemo(() => {
     return {
@@ -1062,23 +1171,24 @@ export function VoidEnvironment() {
     return null;
   }
 
-  const isEncounterActive = Boolean(activeRoomId || activePhilosopherId || inspectingBook);
-
   return (
     <group name="VoidEnvironment">
       {/* Vast Indirect Environmental Light Falloff */}
       <directionalLight
+        ref={dirLightRef}
         position={[-18, 32, 14]}
-        intensity={isEncounterActive ? 0.26 : 0.46}
+        intensity={0.46}
         color="#ebe3d5"
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0001}
       />
       <hemisphereLight
-        args={['#141820', '#040507', isEncounterActive ? 0.09 : 0.15]}
+        ref={hemiLightRef}
+        args={['#141820', '#040507', 0.15]}
       />
       <pointLight
+        ref={pointLightRef}
         position={[12, -4, -40]}
         intensity={0.16}
         distance={65}
@@ -1088,23 +1198,26 @@ export function VoidEnvironment() {
       {/* 1. FOREGROUND LAYER: Atmospheric Dust */}
       <ForegroundAtmosphere isEncounterActive={isEncounterActive} />
 
-      {/* 2. MIDGROUND LAYER: Ancient Imperfect Architectural Remnants (PASS 06B: Museum Disturbance) */}
+      {/* 2. MIDGROUND LAYER: Ancient Imperfect Architectural Remnants (PASS 06B & 06D) */}
       <MidgroundArchitecture
         materials={materials}
         hasMuseumMemory={hasMuseumMemory}
+        isNietzschePrelude={isNietzschePrelude}
       />
 
-      {/* 3. BACKGROUND LAYER: Distant Ruins & Hero Structures (PASS 06B: Great Arch Settling) */}
+      {/* 3. BACKGROUND LAYER: Distant Ruins & Hero Structures (PASS 06B & 06D) */}
       <BackgroundArchitecture
         materials={materials}
         hasMuseumMemory={hasMuseumMemory}
+        isNietzschePrelude={isNietzschePrelude}
       />
 
-      {/* 4. PHYSICAL FLOATING MANUSCRIPTS (PASS 06A: Library Trace & PASS 06C: Book Trace Memory) */}
+      {/* 4. PHYSICAL FLOATING MANUSCRIPTS (PASS 06A, 06C & 06D) */}
       <FloatingManuscripts
         isEncounterActive={isEncounterActive}
         hasLibraryMemory={hasLibraryMemory}
         hasBookMemory={hasBookMemory}
+        isNietzschePrelude={isNietzschePrelude}
       />
     </group>
   );
