@@ -4,17 +4,18 @@ import * as THREE from 'three';
 import { useExperience } from '../hooks/useExperience';
 
 /**
- * VOID ENVIRONMENT — PASS 03: FRAGMENTS OF HUMAN THOUGHT
+ * VOID ENVIRONMENT — PASS 04: THE DISTANT MONUMENT
  * 
  * 1. Three Depth Layers (Foreground, Midground, Background)
  * 2. Ancient Imperfect Architectural Remnants (Columns, Arches, Entablatures, Portals)
- * 3. Hero Structure: The Cyclopean Great Staircase & Broken Void Portal
- * 4. Pass 03 Addition: Physical Floating Manuscript Fragments of Human Thought
- *    - Real parchment curvature and deckled edge texture
- *    - Faint graphite/ink handwritten philosophical questions and lost writings
- *    - Extremely slow, gentle drift suspended in atmospheric currents
- *    - Asymmetric spatial composition connected with architecture
- *    - Subject protection: fragments auto-dim and clear center in active encounters
+ * 3. Hero Architecture: The Cyclopean Great Staircase & Broken Void Portal
+ * 4. Physical Floating Manuscript Fragments of Human Thought (Parchment & Faded Inscriptions)
+ * 5. Pass 04 Addition: The Distant Colossus Monument
+ *    - Colossal, ancient, partially destroyed abstract human-form sculpture in extreme distance (Z: -90)
+ *    - Seated on a cyclopean throne plinth with broken limb and sheared crown
+ *    - Faceless, weathered, mysterious visual landmark looming in the deep fog
+ *    - Completely static, unlit by spotlights, discovered gradually through ambient/directional falloff
+ *    - Visual storytelling: Architecture (built) + Manuscripts (thought) + Monument (humanity looking at itself) + Darkness (lost)
  */
 
 // ============================================================================
@@ -75,7 +76,6 @@ function createParchmentCanvas(text, subtitle, hasDiagram = false) {
   // Faint Simulated Cursive Lines (lost handwriting)
   ctx.fillStyle = 'rgba(58, 47, 36, 0.45)';
   for (let y = 142; y < 620; y += 32) {
-    // Random dash-like handwriting simulation
     let x = 45;
     while (x < 460) {
       const wordLen = 20 + Math.sin(x * 1.5 + y) * 14 + 16;
@@ -188,7 +188,6 @@ function ForegroundAtmosphere({ isEncounterActive }) {
 // 3. LAYER: FLOATING MANUSCRIPT FRAGMENTS OF HUMAN THOUGHT
 // ============================================================================
 
-// Static deterministic definition of manuscript fragments across depth layers
 const MANUSCRIPT_ITEMS = [
   // --- FOREGROUND FRAGMENTS (2 items: peripheral, quiet, close to camera) ---
   {
@@ -354,7 +353,6 @@ const MANUSCRIPT_ITEMS = [
 function FloatingManuscripts({ isEncounterActive }) {
   const groupRef = useRef();
 
-  // Create shared canvas textures once
   const textures = useMemo(() => {
     return {
       WHAT_REMAINS: createParchmentCanvas('WHAT REMAINS?', 'an unfinished testament', false),
@@ -367,7 +365,6 @@ function FloatingManuscripts({ isEncounterActive }) {
     };
   }, []);
 
-  // Shared curved geometries
   const geometries = useMemo(() => {
     return {
       curved: createCurvedParchmentGeometry(1, 1, 0.04, false),
@@ -375,7 +372,6 @@ function FloatingManuscripts({ isEncounterActive }) {
     };
   }, []);
 
-  // Shared parchment materials map
   const materials = useMemo(() => {
     const mats = {};
     Object.keys(textures).forEach((key) => {
@@ -392,7 +388,6 @@ function FloatingManuscripts({ isEncounterActive }) {
     return mats;
   }, [textures]);
 
-  // Very slow, atmospheric floating drift
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     const time = state.clock.elapsedTime;
@@ -402,12 +397,9 @@ function FloatingManuscripts({ isEncounterActive }) {
       const item = MANUSCRIPT_ITEMS[i];
       if (!item) return;
 
-      // Gentle vertical wave
       child.position.y = item.pos[1] + Math.sin(time * item.speed * speedMult + item.phase) * 0.08;
-      // Gentle pitch & roll
       child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
       child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
-      // Very slow yaw rotation
       child.rotation.y += delta * 0.02 * speedMult * (i % 2 === 0 ? 1 : -1);
     });
   });
@@ -416,7 +408,6 @@ function FloatingManuscripts({ isEncounterActive }) {
     <group ref={groupRef} name="ManuscriptFragments">
       {MANUSCRIPT_ITEMS.map((item) => {
         const isFg = item.layer === 'FOREGROUND';
-        // In active encounter mode, foreground fragments vanish to protect active subject focus
         if (isEncounterActive && isFg) return null;
 
         const geom = item.hasFold ? geometries.curvedFolded : geometries.curved;
@@ -443,7 +434,6 @@ function FloatingManuscripts({ isEncounterActive }) {
 // 4. LAYER 2: IMPERFECT ANCIENT ARCHITECTURE
 // ============================================================================
 
-// Multi-Drum Ruined Column with Fractured Cap & Subtle Offsets
 function RuinedColumn({
   position = [0, 0, 0],
   drumCount = 5,
@@ -465,7 +455,7 @@ function RuinedColumn({
         <cylinderGeometry args={[radius * 1.15, radius * 1.25, drumHeight * 0.2, 16]} />
       </mesh>
 
-      {/* Stacked Asymmetric Drums with slight joint irregularities */}
+      {/* Stacked Asymmetric Drums */}
       {Array.from({ length: drumCount }).map((_, idx) => {
         const yPos = drumHeight * 0.55 + idx * drumHeight;
         const rotY = idx * 0.14 + (idx % 2 === 0 ? 0.04 : -0.03);
@@ -477,7 +467,6 @@ function RuinedColumn({
             <mesh material={agedStone} castShadow receiveShadow>
               <cylinderGeometry args={[radiusTop, radiusBottom, drumHeight * 0.96, 16]} />
             </mesh>
-            {/* Subtle Oxidized Bronze Joinery Cramp at drum seams */}
             {idx > 0 && idx < drumCount && idx % 2 === 1 && (
               <mesh position={[radiusTop * 0.88, -drumHeight * 0.48, 0]} material={bronze}>
                 <boxGeometry args={[0.08, 0.04, 0.12]} />
@@ -502,7 +491,7 @@ function RuinedColumn({
         </mesh>
       </group>
 
-      {/* Fallen / Dislodged Drum resting on ground */}
+      {/* Fallen / Dislodged Drum */}
       {hasFallenDrum && (
         <group position={[radius * 2.4, drumHeight * 0.4, radius * 1.2]} rotation={[1.45, 0.2, 0.6]}>
           <mesh material={agedStone} castShadow receiveShadow>
@@ -666,7 +655,114 @@ function MidgroundArchitecture({ materials }) {
 }
 
 // ============================================================================
-// 5. LAYER 3: BACKGROUND MONUMENTAL RUINS + THE ONE STRIKING STRUCTURE
+// 5. PASS 04: THE DISTANT MONUMENT (COLOSSAL HUMAN-FORM SCULPTURE)
+// ============================================================================
+
+/**
+ * An immense, ancient, partially destroyed abstract human-form sculpture.
+ * Placed in the extreme distance (Z: -92m, X: -32m) opposite the Great Staircase.
+ * Suggests a colossal seated figure whose upper body/head fades into the dark ceilingless fog.
+ * Weathered stone, faceless, fractured shoulder/arm, non-emissive, completely static.
+ */
+function DistantColossusMonument({ materials }) {
+  const { darkBasalt, distantStone, weatheredStone } = materials;
+
+  return (
+    <group position={[-32, 0, -92]} rotation={[0, 0.22, 0]} name="DistantColossusMonument">
+      {/* 1. Colossal Stepped Throne Pedestal */}
+      {/* Lowest Plinth Block */}
+      <mesh position={[0, -8.0, 0]} material={darkBasalt}>
+        <boxGeometry args={[36.0, 6.0, 30.0]} />
+      </mesh>
+      {/* Stepped Upper Pedestal Tier */}
+      <mesh position={[0, -3.5, 0]} material={distantStone}>
+        <boxGeometry args={[28.0, 4.0, 24.0]} />
+      </mesh>
+      {/* Monolithic Throne Backrest Slab (rising behind the figure) */}
+      <mesh position={[0, 26.0, -5.5]} material={darkBasalt}>
+        <boxGeometry args={[20.0, 65.0, 5.5]} />
+      </mesh>
+
+      {/* 2. Seated Lower Body & Draped Monolithic Masses */}
+      {/* Central Lap / Throne Base Mass */}
+      <mesh position={[0, 3.5, 3.0]} material={distantStone}>
+        <boxGeometry args={[18.0, 14.0, 16.0]} />
+      </mesh>
+      {/* Intact Left Leg / Knee Mass extending forward */}
+      <mesh position={[-5.5, 1.0, 7.5]} material={distantStone}>
+        <boxGeometry args={[6.5, 16.0, 10.0]} />
+      </mesh>
+      {/* Severed / Fractured Right Leg Stump (shattered at knee level) */}
+      <mesh position={[5.5, -3.2, 5.0]} material={distantStone}>
+        <boxGeometry args={[6.5, 8.0, 7.0]} />
+      </mesh>
+      {/* Dislodged Fallen Knee Block resting angled on plinth */}
+      <mesh
+        position={[6.8, -5.2, 9.2]}
+        rotation={[0.18, 0.35, -0.12]}
+        material={weatheredStone}
+      >
+        <boxGeometry args={[3.8, 2.8, 4.2]} />
+      </mesh>
+
+      {/* 3. Colossal Torso & Shoulders */}
+      {/* Main Monumental Torso */}
+      <mesh position={[0, 24.0, 0]} rotation={[-0.03, 0, 0]} material={distantStone}>
+        <boxGeometry args={[19.5, 26.0, 11.0]} />
+      </mesh>
+      {/* Chiseled Pectoral Plane */}
+      <mesh position={[0, 30.5, 4.5]} material={distantStone}>
+        <boxGeometry args={[16.5, 9.5, 3.0]} />
+      </mesh>
+
+      {/* Intact Left Shoulder Mass */}
+      <mesh position={[-11.2, 33.5, 0]} material={distantStone}>
+        <boxGeometry args={[8.5, 8.5, 9.0]} />
+      </mesh>
+      {/* Left Forearm resting on lap */}
+      <mesh position={[-11.5, 20.5, 2.5]} material={distantStone}>
+        <boxGeometry args={[5.0, 18.0, 5.5]} />
+      </mesh>
+
+      {/* Fractured Right Shoulder (severed at upper bicep with exposed fracture wedge) */}
+      <mesh position={[10.5, 32.5, 0]} material={distantStone}>
+        <boxGeometry args={[7.5, 6.5, 8.0]} />
+      </mesh>
+      <mesh
+        position={[11.2, 28.5, 0.5]}
+        rotation={[0.15, -0.2, 0.28]}
+        material={weatheredStone}
+      >
+        <boxGeometry args={[4.2, 4.8, 5.2]} />
+      </mesh>
+
+      {/* 4. Colossal Faceless Head & Weathered Visage */}
+      {/* Monumental Neck */}
+      <mesh position={[0, 38.5, 0]} material={distantStone}>
+        <cylinderGeometry args={[3.0, 3.6, 6.0, 14]} />
+      </mesh>
+      {/* Faceless Cranium / Weathered Head Mass */}
+      <mesh position={[0, 46.5, 1.0]} material={distantStone}>
+        <boxGeometry args={[8.5, 12.0, 9.5]} />
+      </mesh>
+      {/* Chiseled Monolithic Brow & Jawline Plane (faceless, abstract ancient idol) */}
+      <mesh position={[0, 44.5, 4.8]} material={weatheredStone}>
+        <boxGeometry args={[7.2, 6.5, 3.8]} />
+      </mesh>
+      {/* Fractured Head Crown (sheared top stone fading into void darkness) */}
+      <mesh
+        position={[1.2, 53.0, 0.5]}
+        rotation={[0.08, 0.18, -0.06]}
+        material={darkBasalt}
+      >
+        <boxGeometry args={[6.0, 4.5, 7.0]} />
+      </mesh>
+    </group>
+  );
+}
+
+// ============================================================================
+// 6. LAYER 3: BACKGROUND MONUMENTAL RUINS + HERO STRUCTURES
 // ============================================================================
 
 function BackgroundArchitecture({ materials }) {
@@ -674,7 +770,7 @@ function BackgroundArchitecture({ materials }) {
 
   return (
     <group name="BackgroundMonuments">
-      {/* HERO STRUCTURE: THE CYCLOPEAN GREAT STAIRCASE & BROKEN VOID PORTAL */}
+      {/* HERO STRUCTURE 1: THE CYCLOPEAN GREAT STAIRCASE & BROKEN VOID PORTAL */}
       <group position={[14, 0, -74]}>
         {Array.from({ length: 6 }).map((_, stepIdx) => {
           const stepY = stepIdx * 2.2 - 6.0;
@@ -711,6 +807,9 @@ function BackgroundArchitecture({ materials }) {
           </mesh>
         </group>
       </group>
+
+      {/* HERO STRUCTURE 2 (PASS 04): THE DISTANT COLOSSUS MONUMENT */}
+      <DistantColossusMonument materials={materials} />
 
       {/* FAR LEFT: Distant Hypostyle Pillars & Towering Architrave Beams */}
       <mesh position={[-36, 18.0, -64]} material={distantStone}>
@@ -754,7 +853,7 @@ function BackgroundArchitecture({ materials }) {
 }
 
 // ============================================================================
-// 6. MAIN VOID ENVIRONMENT EXPORT
+// 7. MAIN VOID ENVIRONMENT EXPORT
 // ============================================================================
 
 export function VoidEnvironment() {
@@ -804,10 +903,10 @@ export function VoidEnvironment() {
       {/* 2. MIDGROUND LAYER: Ancient Imperfect Architectural Remnants */}
       <MidgroundArchitecture materials={materials} />
 
-      {/* 3. BACKGROUND LAYER: Distant Monumental Ruins + The Great Cyclopean Staircase & Portal */}
+      {/* 3. BACKGROUND LAYER: Distant Monumental Ruins, The Great Staircase & The Distant Colossus */}
       <BackgroundArchitecture materials={materials} />
 
-      {/* 4. PASS 03: Physical Floating Manuscript Fragments of Human Thought */}
+      {/* 4. PHYSICAL FLOATING MANUSCRIPTS: Fragments of Human Thought */}
       <FloatingManuscripts isEncounterActive={isEncounterActive} />
     </group>
   );
