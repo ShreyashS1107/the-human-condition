@@ -4,26 +4,143 @@ import * as THREE from 'three';
 import { useExperience } from '../hooks/useExperience';
 
 /**
- * VOID ENVIRONMENT — PASS 02: ANCIENT ARCHITECTURAL REMNANTS
+ * VOID ENVIRONMENT — PASS 03: FRAGMENTS OF HUMAN THOUGHT
  * 
- * Culturally ambiguous, imperfect, monumental remnants of an impossible ancient civilization / museum.
- * 
- * 3 Spatial Layers:
- * 1. FOREGROUND: Sparse atmospheric dust motes with gentle drifting parallax.
- * 2. MIDGROUND: Asymmetric groupings of broken multi-drum columns, fractured arches,
- *    entablatures with bronze joinery, fallen stone blocks, and stepped foundation courses.
- * 3. BACKGROUND: Colossal distant ruins, featuring ONE striking monumental structure:
- *    The Great Cyclopean Staircase & Broken Monolithic Portal looming in the far void.
+ * 1. Three Depth Layers (Foreground, Midground, Background)
+ * 2. Ancient Imperfect Architectural Remnants (Columns, Arches, Entablatures, Portals)
+ * 3. Hero Structure: The Cyclopean Great Staircase & Broken Void Portal
+ * 4. Pass 03 Addition: Physical Floating Manuscript Fragments of Human Thought
+ *    - Real parchment curvature and deckled edge texture
+ *    - Faint graphite/ink handwritten philosophical questions and lost writings
+ *    - Extremely slow, gentle drift suspended in atmospheric currents
+ *    - Asymmetric spatial composition connected with architecture
+ *    - Subject protection: fragments auto-dim and clear center in active encounters
  */
 
-// Precomputed deterministic distribution for foreground atmospheric dust motes
+// ============================================================================
+// 1. PROCEDURAL PARCHMENT & INK TEXTURE GENERATORS (Pure Canvas, No Assets)
+// ============================================================================
+
+function createParchmentCanvas(text, subtitle, hasDiagram = false) {
+  if (typeof document === 'undefined') return null;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 700;
+  const ctx = canvas.getContext('2d');
+
+  // Base Aged Parchment Tone
+  ctx.fillStyle = '#b8a98f';
+  ctx.fillRect(0, 0, 512, 700);
+
+  // Subtle Aged Vignette / Weathering
+  const grad = ctx.createRadialGradient(256, 350, 80, 256, 350, 360);
+  grad.addColorStop(0, 'rgba(215, 203, 180, 0.6)');
+  grad.addColorStop(0.7, 'rgba(175, 158, 132, 0.4)');
+  grad.addColorStop(1, 'rgba(95, 82, 65, 0.85)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 512, 700);
+
+  // Weathered Deckled Edge Darkening
+  ctx.strokeStyle = '#5a4d3c';
+  ctx.lineWidth = 14;
+  ctx.strokeRect(6, 6, 500, 688);
+
+  // Faint Ink Rules / Guide Lines
+  ctx.strokeStyle = 'rgba(120, 105, 88, 0.25)';
+  ctx.lineWidth = 1.0;
+  for (let y = 110; y < 650; y += 32) {
+    ctx.beginPath();
+    ctx.moveTo(40, y);
+    ctx.lineTo(472, y);
+    ctx.stroke();
+  }
+
+  // Optional Ancient Geometric / Compass Diagram
+  if (hasDiagram) {
+    ctx.strokeStyle = 'rgba(75, 62, 50, 0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(380, 540, 55, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(380, 540, 32, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(320, 540);
+    ctx.lineTo(440, 540);
+    ctx.stroke();
+  }
+
+  // Faint Simulated Cursive Lines (lost handwriting)
+  ctx.fillStyle = 'rgba(58, 47, 36, 0.45)';
+  for (let y = 142; y < 620; y += 32) {
+    // Random dash-like handwriting simulation
+    let x = 45;
+    while (x < 460) {
+      const wordLen = 20 + Math.sin(x * 1.5 + y) * 14 + 16;
+      if (Math.sin(x + y * 2) > -0.7) {
+        ctx.fillRect(x, y - 6, wordLen, 3.5);
+      }
+      x += wordLen + 8 + (Math.sin(x * 3) * 4);
+    }
+  }
+
+  // Main Philosophical Query / Heading Text (if specified)
+  if (text) {
+    ctx.fillStyle = '#231b14';
+    ctx.font = 'bold 34px "Cinzel", "Times New Roman", Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '3px';
+    ctx.fillText(text, 256, 175);
+
+    if (subtitle) {
+      ctx.fillStyle = 'rgba(50, 40, 30, 0.75)';
+      ctx.font = 'italic 20px "Cormorant Garamond", Georgia, serif';
+      ctx.fillText(subtitle, 256, 215);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.generateMipmaps = true;
+  return texture;
+}
+
+// Generate Curved Parchment Mesh Geometry
+function createCurvedParchmentGeometry(width = 0.36, height = 0.50, curveAmount = 0.035, foldCorner = false) {
+  const geom = new THREE.PlaneGeometry(width, height, 8, 8);
+  const pos = geom.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const u = x / width + 0.5;
+    const v = y / height + 0.5;
+
+    let z = -Math.sin(u * Math.PI) * curveAmount - (v - 0.5) * (curveAmount * 0.4);
+
+    if (foldCorner && u > 0.72 && v > 0.72) {
+      z += ((u - 0.72) / 0.28) * ((v - 0.72) / 0.28) * (curveAmount * 2.2);
+    }
+
+    pos.setZ(i, z);
+  }
+  geom.computeVertexNormals();
+  return geom;
+}
+
+// ============================================================================
+// 2. LAYER 1: FOREGROUND ATMOSPHERIC DUST MOTES
+// ============================================================================
+
 function createDustPositions(count = 190) {
   const pos = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     const s1 = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
     const s2 = Math.sin(i * 26.6514 + 45.164) * 23421.6312;
     const s3 = Math.sin(i * 39.3467 + 11.876) * 31415.9265;
-    
+
     const r1 = s1 - Math.floor(s1);
     const r2 = s2 - Math.floor(s2);
     const r3 = s3 - Math.floor(s3);
@@ -37,7 +154,6 @@ function createDustPositions(count = 190) {
 
 const STATIC_DUST_POSITIONS = createDustPositions(190);
 
-// 1. FOREGROUND LAYER: Atmospheric Dust Motes
 function ForegroundAtmosphere({ isEncounterActive }) {
   const pointsRef = useRef();
 
@@ -68,6 +184,265 @@ function ForegroundAtmosphere({ isEncounterActive }) {
   );
 }
 
+// ============================================================================
+// 3. LAYER: FLOATING MANUSCRIPT FRAGMENTS OF HUMAN THOUGHT
+// ============================================================================
+
+// Static deterministic definition of manuscript fragments across depth layers
+const MANUSCRIPT_ITEMS = [
+  // --- FOREGROUND FRAGMENTS (2 items: peripheral, quiet, close to camera) ---
+  {
+    id: 'fg-1',
+    layer: 'FOREGROUND',
+    pos: [-4.6, -0.6, 2.8],
+    rot: [0.28, 0.42, -0.18],
+    scale: [0.34, 0.48, 1],
+    textType: 'REMEMBER',
+    hasFold: true,
+    speed: 0.25,
+    phase: 0.4,
+  },
+  {
+    id: 'fg-2',
+    layer: 'FOREGROUND',
+    pos: [4.8, 1.2, 2.2],
+    rot: [-0.22, -0.38, 0.14],
+    scale: [0.32, 0.44, 1],
+    textType: 'TIME',
+    hasFold: false,
+    speed: 0.3,
+    phase: 1.8,
+  },
+
+  // --- MIDGROUND FRAGMENTS (6 items: near columns, arch, wall remnants) ---
+  {
+    id: 'mg-1',
+    layer: 'MIDGROUND',
+    pos: [-12.2, 4.5, -17.5],
+    rot: [0.15, 0.6, -0.08],
+    scale: [0.38, 0.52, 1],
+    textType: 'WHAT_REMAINS',
+    hasFold: true,
+    speed: 0.22,
+    phase: 2.5,
+  },
+  {
+    id: 'mg-2',
+    layer: 'MIDGROUND',
+    pos: [-6.8, 0.4, -22.5],
+    rot: [-0.18, 0.2, 0.12],
+    scale: [0.32, 0.44, 1],
+    textType: 'UNREADABLE',
+    hasFold: false,
+    speed: 0.28,
+    phase: 4.1,
+  },
+  {
+    id: 'mg-3',
+    layer: 'MIDGROUND',
+    pos: [-3.2, 5.2, -24.0],
+    rot: [0.32, -0.45, -0.15],
+    scale: [0.36, 0.50, 1],
+    textType: 'WHY',
+    hasFold: true,
+    speed: 0.2,
+    phase: 0.9,
+  },
+  {
+    id: 'mg-4',
+    layer: 'MIDGROUND',
+    pos: [8.5, 2.0, -18.5],
+    rot: [0.12, 0.35, -0.05],
+    scale: [0.35, 0.48, 1],
+    textType: 'WHAT_CHOOSE',
+    hasFold: false,
+    speed: 0.26,
+    phase: 3.2,
+  },
+  {
+    id: 'mg-5',
+    layer: 'MIDGROUND',
+    pos: [15.2, 4.4, -16.5],
+    rot: [-0.25, -0.3, 0.2],
+    scale: [0.34, 0.46, 1],
+    textType: 'UNREADABLE_DIAGRAM',
+    hasFold: true,
+    speed: 0.24,
+    phase: 5.0,
+  },
+  {
+    id: 'mg-6',
+    layer: 'MIDGROUND',
+    pos: [19.8, -1.5, -21.0],
+    rot: [0.4, -0.2, -0.25],
+    scale: [0.32, 0.42, 1],
+    textType: 'UNREADABLE',
+    hasFold: false,
+    speed: 0.18,
+    phase: 1.3,
+  },
+
+  // --- BACKGROUND FRAGMENTS (6 items: distant monumental scale) ---
+  {
+    id: 'bg-1',
+    layer: 'BACKGROUND',
+    pos: [11.5, 14.5, -66.0],
+    rot: [0.2, 0.15, -0.1],
+    scale: [1.2, 1.6, 1],
+    textType: 'WHAT_REMAINS',
+    hasFold: false,
+    speed: 0.15,
+    phase: 2.1,
+  },
+  {
+    id: 'bg-2',
+    layer: 'BACKGROUND',
+    pos: [17.5, 5.5, -68.0],
+    rot: [-0.15, -0.25, 0.08],
+    scale: [1.1, 1.5, 1],
+    textType: 'UNREADABLE',
+    hasFold: true,
+    speed: 0.18,
+    phase: 4.6,
+  },
+  {
+    id: 'bg-3',
+    layer: 'BACKGROUND',
+    pos: [-27.0, 11.0, -60.0],
+    rot: [0.18, 0.4, -0.12],
+    scale: [1.3, 1.8, 1],
+    textType: 'UNREADABLE_DIAGRAM',
+    hasFold: false,
+    speed: 0.14,
+    phase: 0.7,
+  },
+  {
+    id: 'bg-4',
+    layer: 'BACKGROUND',
+    pos: [-36.0, 21.0, -64.0],
+    rot: [-0.22, 0.3, 0.15],
+    scale: [1.4, 1.9, 1],
+    textType: 'WHY',
+    hasFold: true,
+    speed: 0.16,
+    phase: 3.8,
+  },
+  {
+    id: 'bg-5',
+    layer: 'BACKGROUND',
+    pos: [36.0, 7.5, -73.0],
+    rot: [0.1, -0.35, -0.2],
+    scale: [1.5, 2.0, 1],
+    textType: 'UNREADABLE',
+    hasFold: false,
+    speed: 0.12,
+    phase: 5.5,
+  },
+  {
+    id: 'bg-6',
+    layer: 'BACKGROUND',
+    pos: [-46.0, 9.0, -76.0],
+    rot: [-0.15, 0.2, 0.1],
+    scale: [1.6, 2.2, 1],
+    textType: 'UNREADABLE',
+    hasFold: false,
+    speed: 0.15,
+    phase: 1.9,
+  },
+];
+
+function FloatingManuscripts({ isEncounterActive }) {
+  const groupRef = useRef();
+
+  // Create shared canvas textures once
+  const textures = useMemo(() => {
+    return {
+      WHAT_REMAINS: createParchmentCanvas('WHAT REMAINS?', 'an unfinished testament', false),
+      WHAT_CHOOSE: createParchmentCanvas('WHAT DO YOU CHOOSE?', 'on agency and fate', false),
+      WHY: createParchmentCanvas('WHY?', null, false),
+      REMEMBER: createParchmentCanvas('REMEMBER', 'fragments of memory', false),
+      TIME: createParchmentCanvas('TIME', 'the perpetual flux', true),
+      UNREADABLE_DIAGRAM: createParchmentCanvas(null, null, true),
+      UNREADABLE: createParchmentCanvas(null, null, false),
+    };
+  }, []);
+
+  // Shared curved geometries
+  const geometries = useMemo(() => {
+    return {
+      curved: createCurvedParchmentGeometry(1, 1, 0.04, false),
+      curvedFolded: createCurvedParchmentGeometry(1, 1, 0.045, true),
+    };
+  }, []);
+
+  // Shared parchment materials map
+  const materials = useMemo(() => {
+    const mats = {};
+    Object.keys(textures).forEach((key) => {
+      mats[key] = new THREE.MeshStandardMaterial({
+        map: textures[key],
+        roughness: 0.85,
+        metalness: 0.04,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.82,
+        shadowSide: THREE.DoubleSide,
+      });
+    });
+    return mats;
+  }, [textures]);
+
+  // Very slow, atmospheric floating drift
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
+    const time = state.clock.elapsedTime;
+    const speedMult = isEncounterActive ? 0.35 : 1.0;
+
+    groupRef.current.children.forEach((child, i) => {
+      const item = MANUSCRIPT_ITEMS[i];
+      if (!item) return;
+
+      // Gentle vertical wave
+      child.position.y = item.pos[1] + Math.sin(time * item.speed * speedMult + item.phase) * 0.08;
+      // Gentle pitch & roll
+      child.rotation.x = item.rot[0] + Math.sin(time * 0.3 * speedMult + item.phase) * 0.04;
+      child.rotation.z = item.rot[2] + Math.cos(time * 0.25 * speedMult + item.phase) * 0.03;
+      // Very slow yaw rotation
+      child.rotation.y += delta * 0.02 * speedMult * (i % 2 === 0 ? 1 : -1);
+    });
+  });
+
+  return (
+    <group ref={groupRef} name="ManuscriptFragments">
+      {MANUSCRIPT_ITEMS.map((item) => {
+        const isFg = item.layer === 'FOREGROUND';
+        // In active encounter mode, foreground fragments vanish to protect active subject focus
+        if (isEncounterActive && isFg) return null;
+
+        const geom = item.hasFold ? geometries.curvedFolded : geometries.curved;
+        const mat = materials[item.textType] || materials.UNREADABLE;
+
+        return (
+          <mesh
+            key={item.id}
+            position={item.pos}
+            rotation={item.rot}
+            scale={item.scale}
+            geometry={geom}
+            material={mat}
+            castShadow
+            receiveShadow
+          />
+        );
+      })}
+    </group>
+  );
+}
+
+// ============================================================================
+// 4. LAYER 2: IMPERFECT ANCIENT ARCHITECTURE
+// ============================================================================
+
 // Multi-Drum Ruined Column with Fractured Cap & Subtle Offsets
 function RuinedColumn({
   position = [0, 0, 0],
@@ -93,11 +468,10 @@ function RuinedColumn({
       {/* Stacked Asymmetric Drums with slight joint irregularities */}
       {Array.from({ length: drumCount }).map((_, idx) => {
         const yPos = drumHeight * 0.55 + idx * drumHeight;
-        // Subtle drum rotation offset for ancient stone masonry realism
         const rotY = idx * 0.14 + (idx % 2 === 0 ? 0.04 : -0.03);
         const radiusBottom = radius * (1.02 - idx * 0.015);
         const radiusTop = radius * (0.99 - idx * 0.015);
-        
+
         return (
           <group key={idx} position={[0, yPos, 0]} rotation={[0, rotY, 0]}>
             <mesh material={agedStone} castShadow receiveShadow>
@@ -115,11 +489,9 @@ function RuinedColumn({
 
       {/* Fractured / Chipped Column Capital Top */}
       <group position={[0, drumHeight * 0.55 + drumCount * drumHeight, 0]}>
-        {/* Weathered Abacus Block */}
         <mesh position={[0, drumHeight * 0.15, 0]} material={agedStone} castShadow receiveShadow>
           <boxGeometry args={[radius * 2.2, drumHeight * 0.35, radius * 2.2]} />
         </mesh>
-        {/* Fractured top stone fragment */}
         <mesh
           position={[radius * 0.25, drumHeight * 0.42, -radius * 0.2]}
           rotation={[0.08, 0.25, -0.06]}
@@ -136,7 +508,6 @@ function RuinedColumn({
           <mesh material={agedStone} castShadow receiveShadow>
             <cylinderGeometry args={[radius * 0.95, radius, drumHeight * 0.9, 16]} />
           </mesh>
-          {/* Chipped stone piece next to fallen drum */}
           <mesh position={[0.4, -drumHeight * 0.4, 0.3]} material={darkBasalt} castShadow>
             <dodecahedronGeometry args={[0.25, 0]} />
           </mesh>
@@ -146,17 +517,13 @@ function RuinedColumn({
   );
 }
 
-// 2. MIDGROUND LAYER: Recognizable Ancient Architectural Remnants (Z: -16 to -32)
 function MidgroundArchitecture({ materials }) {
   const { agedStone, darkBasalt, weatheredStone, bronze } = materials;
 
   return (
     <group name="MidgroundRemnants">
-      {/* ========================================================================= */}
       {/* 1. LEFT FLANK: Colossal Broken Arch & Entablature Remnants (Z: -20 to -24) */}
-      {/* ========================================================================= */}
       <group position={[-17, 0, -22]}>
-        {/* Massive Cyclopean Stepped Foundation Pier */}
         <mesh position={[0, -2.5, 0]} material={darkBasalt} receiveShadow>
           <boxGeometry args={[5.2, 3.6, 5.2]} />
         </mesh>
@@ -164,27 +531,22 @@ function MidgroundArchitecture({ materials }) {
           <boxGeometry args={[4.2, 2.2, 4.2]} />
         </mesh>
 
-        {/* Towering Colonnade Pier */}
         <mesh position={[0, 8.5, 0]} material={agedStone} castShadow receiveShadow>
           <boxGeometry args={[3.2, 14.8, 3.2]} />
         </mesh>
 
-        {/* Stepped Moulding & Architrave Capital */}
         <mesh position={[0, 16.4, 0]} material={weatheredStone} castShadow receiveShadow>
           <boxGeometry args={[4.4, 1.2, 4.4]} />
         </mesh>
 
-        {/* Colossal Fractured Architrave / Lintel Span extending to the right and breaking off */}
+        {/* Colossal Fractured Architrave / Lintel Span */}
         <group position={[5.5, 17.5, 0]}>
-          {/* Main Lower Fascia Band */}
           <mesh position={[0, 0, 0]} material={agedStone} castShadow receiveShadow>
             <boxGeometry args={[11.5, 1.3, 2.8]} />
           </mesh>
-          {/* Upper Stepped Cornice with jagged broken end */}
           <mesh position={[-1.2, 1.0, 0]} material={weatheredStone} castShadow receiveShadow>
             <boxGeometry args={[9.2, 0.7, 3.2]} />
           </mesh>
-          {/* Exposed Fractured Stone Breakage Block at fracture point */}
           <mesh
             position={[5.2, 0.3, 0.1]}
             rotation={[0.08, 0.3, -0.15]}
@@ -193,7 +555,6 @@ function MidgroundArchitecture({ materials }) {
           >
             <boxGeometry args={[2.2, 1.6, 2.4]} />
           </mesh>
-          {/* Ancient Bronze Cramps holding ancient masonry seams */}
           {[-3.5, 0.5].map((cx, i) => (
             <mesh key={i} position={[cx, 0.7, 1.42]} material={bronze}>
               <boxGeometry args={[0.22, 0.08, 0.04]} />
@@ -201,7 +562,6 @@ function MidgroundArchitecture({ materials }) {
           ))}
         </group>
 
-        {/* Dislodged Fallen Architrave Block lying partially buried below */}
         <mesh
           position={[7.5, -4.2, 2.2]}
           rotation={[0.18, 0.45, -0.12]}
@@ -213,10 +573,7 @@ function MidgroundArchitecture({ materials }) {
         </mesh>
       </group>
 
-      {/* ========================================================================= */}
-      {/* 2. CENTER-LEFT: Ruined Colonnade Grouping with Varied Broken Heights      */}
-      {/* ========================================================================= */}
-      {/* Tallest Standing Column (Fractured Capital) */}
+      {/* 2. CENTER-LEFT: Ruined Colonnade Grouping */}
       <RuinedColumn
         position={[-8.5, -3.8, -25]}
         drumCount={5}
@@ -226,7 +583,6 @@ function MidgroundArchitecture({ materials }) {
         rotationY={0.3}
         materials={materials}
       />
-      {/* Medium Broken Column (Severed at 3rd drum) */}
       <RuinedColumn
         position={[-5.0, -3.8, -28]}
         drumCount={3}
@@ -236,7 +592,6 @@ function MidgroundArchitecture({ materials }) {
         rotationY={-0.4}
         materials={materials}
       />
-      {/* Low Ruined Stump Column with chipped fluting */}
       <RuinedColumn
         position={[-2.2, -3.8, -29]}
         drumCount={1}
@@ -247,16 +602,12 @@ function MidgroundArchitecture({ materials }) {
         materials={materials}
       />
 
-      {/* ========================================================================= */}
-      {/* 3. RIGHT FLANK: Monumental Monolithic Portal Wall & Doorframe Remnants   */}
-      {/* ========================================================================= */}
+      {/* 3. RIGHT FLANK: Monumental Monolithic Portal Wall & Doorframe Remnants */}
       <group position={[18, 0, -21]}>
-        {/* Massive Stepped Plinth Base */}
         <mesh position={[0, -3.5, 0]} material={darkBasalt} receiveShadow>
           <boxGeometry args={[8.5, 3.0, 5.0]} />
         </mesh>
 
-        {/* Colossal Vertical Monolith Wall Slab with recessed architectural reveal */}
         <mesh
           position={[0, 7.5, 0]}
           rotation={[-0.02, -0.22, 0.01]}
@@ -266,7 +617,6 @@ function MidgroundArchitecture({ materials }) {
         >
           <boxGeometry args={[5.2, 20.0, 2.6]} />
         </mesh>
-        {/* Inner Doorway Jamb Reveal (Stepped cathedral/temple portal profile) */}
         <mesh
           position={[-2.4, 6.0, 0.4]}
           rotation={[-0.02, -0.22, 0.01]}
@@ -277,7 +627,6 @@ function MidgroundArchitecture({ materials }) {
           <boxGeometry args={[1.2, 17.0, 2.2]} />
         </mesh>
 
-        {/* Adjacent Ruined Pylon Shaft */}
         <mesh
           position={[5.5, 6.0, -3.5]}
           material={agedStone}
@@ -287,7 +636,6 @@ function MidgroundArchitecture({ materials }) {
           <boxGeometry args={[2.6, 21.0, 2.6]} />
         </mesh>
 
-        {/* Broken Ancient Stairway Remnant (3 monumental stone steps leading to nowhere) */}
         <group position={[-3.8, -3.2, 1.8]} rotation={[0, -0.2, 0]}>
           <mesh position={[0, 0, 0]} material={darkBasalt} receiveShadow>
             <boxGeometry args={[4.8, 0.6, 2.0]} />
@@ -301,15 +649,11 @@ function MidgroundArchitecture({ materials }) {
         </group>
       </group>
 
-      {/* ========================================================================= */}
-      {/* 4. SUBTERRANEAN FOUNDATIONS: Cyclopean Tiered Terraces across Midground  */}
-      {/* ========================================================================= */}
+      {/* 4. SUBTERRANEAN FOUNDATIONS */}
       <group position={[0, -6.2, -23]}>
-        {/* Broad deep sunken terrace foundation */}
         <mesh material={darkBasalt} receiveShadow>
           <boxGeometry args={[74, 2.2, 34]} />
         </mesh>
-        {/* Stepped upper foundation course with intentional broken gaps */}
         <mesh position={[-16, 1.4, -2]} material={agedStone} receiveShadow>
           <boxGeometry args={[32, 0.8, 14]} />
         </mesh>
@@ -321,18 +665,17 @@ function MidgroundArchitecture({ materials }) {
   );
 }
 
-// 3. BACKGROUND LAYER: Distant Monumental Ruins & THE ONE STRIKING STRUCTURE (Z: -45 to -85)
+// ============================================================================
+// 5. LAYER 3: BACKGROUND MONUMENTAL RUINS + THE ONE STRIKING STRUCTURE
+// ============================================================================
+
 function BackgroundArchitecture({ materials }) {
   const { darkBasalt, distantStone, weatheredStone } = materials;
 
   return (
     <group name="BackgroundMonuments">
-      {/* ================================================================================== */}
-      {/* HERO STRUCTURE (PASS 02): THE CYCLOPEAN GREAT STAIRCASE & BROKEN VOID PORTAL       */}
-      {/* Position: X: 12 to 24, Z: -74, Y: 0 to 46. Looming monumental doorway into void.  */}
-      {/* ================================================================================== */}
+      {/* HERO STRUCTURE: THE CYCLOPEAN GREAT STAIRCASE & BROKEN VOID PORTAL */}
       <group position={[14, 0, -74]}>
-        {/* 1. Titanic Great Staircase (6 colossal cyclopean tiers ascending into darkness) */}
         {Array.from({ length: 6 }).map((_, stepIdx) => {
           const stepY = stepIdx * 2.2 - 6.0;
           const stepZ = -stepIdx * 2.8;
@@ -348,23 +691,17 @@ function BackgroundArchitecture({ materials }) {
           );
         })}
 
-        {/* 2. Colossal Portal Doorframe flanking piers */}
-        {/* Left Titanic Doorway Pier */}
         <mesh position={[-7.5, 18.0, -17.0]} material={distantStone}>
           <boxGeometry args={[4.2, 38.0, 4.2]} />
         </mesh>
-        {/* Right Titanic Doorway Pier */}
         <mesh position={[7.5, 20.0, -17.0]} material={distantStone}>
           <boxGeometry args={[4.6, 42.0, 4.6]} />
         </mesh>
 
-        {/* 3. Colossal Broken Portal Architrave Lintel spanning above doorway */}
         <group position={[1.5, 36.5, -17.0]}>
-          {/* Intact Right Architrave Span */}
           <mesh position={[2.0, 0, 0]} material={distantStone}>
             <boxGeometry args={[16.0, 4.5, 5.0]} />
           </mesh>
-          {/* Fractured Overhang on Left extending into black void */}
           <mesh
             position={[-7.0, 0.8, 0.2]}
             rotation={[0, 0.12, -0.08]}
@@ -375,18 +712,13 @@ function BackgroundArchitecture({ materials }) {
         </group>
       </group>
 
-      {/* ================================================================================== */}
-      {/* 2. FAR LEFT: Distant Hypostyle Pillars & Towering Architrave Beams (Z: -62 to -78) */}
-      {/* ================================================================================== */}
-      {/* Colossal Column 1 */}
+      {/* FAR LEFT: Distant Hypostyle Pillars & Towering Architrave Beams */}
       <mesh position={[-36, 18.0, -64]} material={distantStone}>
         <cylinderGeometry args={[3.4, 3.9, 58.0, 16]} />
       </mesh>
-      {/* Colossal Column 2 */}
       <mesh position={[-24, 16.0, -72]} material={distantStone}>
         <cylinderGeometry args={[3.2, 3.7, 54.0, 16]} />
       </mesh>
-      {/* Distant Horizontal Entablature Span between pillars */}
       <mesh
         position={[-30, 38.0, -68]}
         rotation={[0, 0.35, 0.02]}
@@ -395,10 +727,7 @@ function BackgroundArchitecture({ materials }) {
         <boxGeometry args={[22.0, 3.8, 4.2]} />
       </mesh>
 
-      {/* ================================================================================== */}
-      {/* 3. PERIPHERAL HORIZON MEGALITHS (Z: -80 to -88)                                    */}
-      {/* ================================================================================== */}
-      {/* Distant Fractured Cyclopean Wall Slab on Left Horizon */}
+      {/* PERIPHERAL HORIZON MEGALITHS */}
       <mesh
         position={[-56, 20.0, -84]}
         rotation={[0, 0.22, 0]}
@@ -407,7 +736,6 @@ function BackgroundArchitecture({ materials }) {
         <boxGeometry args={[28.0, 52.0, 4.0]} />
       </mesh>
 
-      {/* Distant Towering Monolithic Pylon on Right Horizon */}
       <mesh
         position={[46, 22.0, -82]}
         rotation={[0, -0.18, 0]}
@@ -425,37 +753,35 @@ function BackgroundArchitecture({ materials }) {
   );
 }
 
+// ============================================================================
+// 6. MAIN VOID ENVIRONMENT EXPORT
+// ============================================================================
+
 export function VoidEnvironment() {
   const { currentStage, stages, activeRoomId, activePhilosopherId, inspectingBook } = useExperience();
 
-  // Create shared, highly tuned architectural materials
   const materials = useMemo(() => {
     return {
-      // Aged matte stone (midground columns, architraves, doorframes)
       agedStone: new THREE.MeshStandardMaterial({
         color: '#0a0b0e',
         roughness: 0.92,
         metalness: 0.04,
       }),
-      // Older dark basalt (footings, cyclopean foundations, fallen blocks)
       darkBasalt: new THREE.MeshStandardMaterial({
         color: '#050608',
         roughness: 0.98,
         metalness: 0.02,
       }),
-      // Weathered porous stone (stepped mouldings, arch crowns, reveals catching soft light)
       weatheredStone: new THREE.MeshStandardMaterial({
         color: '#0e1014',
         roughness: 0.88,
         metalness: 0.06,
       }),
-      // Distant monumental stone (background hero staircase and distant monoliths)
       distantStone: new THREE.MeshStandardMaterial({
         color: '#050608',
         roughness: 0.98,
         metalness: 0.02,
       }),
-      // Tiny antique oxidized bronze joinery details (cramps, mortise dowels - no glow)
       bronze: new THREE.MeshStandardMaterial({
         color: '#2a241b',
         roughness: 0.62,
@@ -464,7 +790,6 @@ export function VoidEnvironment() {
     };
   }, []);
 
-  // Pure black ending stage disables void environment
   if (currentStage === stages.ENDING) {
     return null;
   }
@@ -476,11 +801,14 @@ export function VoidEnvironment() {
       {/* 1. FOREGROUND LAYER: Sparse Atmospheric Dust */}
       <ForegroundAtmosphere isEncounterActive={isEncounterActive} />
 
-      {/* 2. MIDGROUND LAYER: Imperfect Ancient Architectural Remnants */}
+      {/* 2. MIDGROUND LAYER: Ancient Imperfect Architectural Remnants */}
       <MidgroundArchitecture materials={materials} />
 
       {/* 3. BACKGROUND LAYER: Distant Monumental Ruins + The Great Cyclopean Staircase & Portal */}
       <BackgroundArchitecture materials={materials} />
+
+      {/* 4. PASS 03: Physical Floating Manuscript Fragments of Human Thought */}
+      <FloatingManuscripts isEncounterActive={isEncounterActive} />
     </group>
   );
 }
